@@ -3,7 +3,7 @@ class State:
         self.grid = grid
         
     def __str__(self):
-        return "\n".join(" ".join(str(x) for x in row) for row in self.grid)
+        return "\n\n".join("   ".join(str(x) for x in row) for row in self.grid)
     
 examp = [[0,0,1,2], [1, 1, 2,0], [0, 2, 0, 1]]
 

@@ -1,4 +1,105 @@
-Nice — I’ll break this down into a clear, actionable step-by-step plan (no code). I’ll reference the official brief you uploaded as needed. 
+
+
+
+GAME EXPLANATION:
+
+Got it — the brief uses a lot of formal/academic phrasing, so let me re-explain the **Hinger game** in plain English.
+
+---
+
+## The board
+
+* The board is an **m×n grid**.
+* Each square (cell) contains a **non-negative integer counter**:
+
+  * `0` means the square is **empty** (inactive).
+  * `>0` means the square is **active** and contains that many counters.
+
+Example:
+
+```
+2 0 1
+1 1 0
+0 0 0
+```
+
+Here:
+
+* Top-left has 2 counters (active).
+* Top-right has 1 counter (active).
+* Others are either 1 (active) or 0 (empty).
+
+---
+
+## Moves
+
+* Players take turns.
+* On your turn:
+
+  1. **Pick one active square** (count > 0).
+  2. **Remove exactly one counter** from it.
+  3. That square’s number goes down by 1. If it becomes 0, the square becomes inactive.
+
+---
+
+## Regions
+
+* A **region** = a connected cluster of active squares (≥1 counter).
+* Connectivity uses **8 directions** (N, NE, E, SE, S, SW, W, NW).
+* Example: if you have active counters at (0,0) and (0,1), they’re in the same region because they’re side by side.
+
+---
+
+## Hingers (the key twist)
+
+* A **hinger** is a special active square.
+* Definition: If that square contains exactly **1 counter**, and removing that counter would **increase the number of regions**, then it is a hinger.
+
+Think of it like a “bridge” square connecting two clusters. If you remove it, the cluster splits apart.
+
+Example:
+
+```
+1 1 1
+0 0 0
+```
+
+Here:
+
+* The middle `1` is a **hinger**.
+* Remove it → the left `1` and right `1` become **two separate regions**.
+
+---
+
+## Winning condition
+
+* **The moment a player removes a counter from a hinger**, that player **wins immediately**.
+* If the game ends (all squares 0) and nobody removed a hinger, it’s a **draw**.
+
+---
+
+## Illegal move
+
+* If a player tries to play on a square that is not active (0 counters), that is **illegal**.
+* In that case, the **other player immediately wins**.
+
+---
+
+## Putting it together
+
+So the flow is:
+
+1. Start with a grid of counters.
+2. Players alternate moves, each removing one counter from an active square.
+3. If you remove a hinger, you win instantly.
+4. If you empty the board without touching a hinger, it’s a draw.
+5. If someone makes an illegal move, their opponent wins.
+
+---
+
+===================================== Plan ===================================
+
+
 
 # Quick summary
 
@@ -232,107 +333,3 @@ Day 24: Write reflection report, finalize headers, zip, final run and submit (de
 
 
 
-
-
-
-GAME EXPLANATION:
-
-Got it — the brief uses a lot of formal/academic phrasing, so let me re-explain the **Hinger game** in plain English.
-
----
-
-## The board
-
-* The board is an **m×n grid**.
-* Each square (cell) contains a **non-negative integer counter**:
-
-  * `0` means the square is **empty** (inactive).
-  * `>0` means the square is **active** and contains that many counters.
-
-Example:
-
-```
-2 0 1
-1 1 0
-0 0 0
-```
-
-Here:
-
-* Top-left has 2 counters (active).
-* Top-right has 1 counter (active).
-* Others are either 1 (active) or 0 (empty).
-
----
-
-## Moves
-
-* Players take turns.
-* On your turn:
-
-  1. **Pick one active square** (count > 0).
-  2. **Remove exactly one counter** from it.
-  3. That square’s number goes down by 1. If it becomes 0, the square becomes inactive.
-
----
-
-## Regions
-
-* A **region** = a connected cluster of active squares (≥1 counter).
-* Connectivity uses **8 directions** (N, NE, E, SE, S, SW, W, NW).
-* Example: if you have active counters at (0,0) and (0,1), they’re in the same region because they’re side by side.
-
----
-
-## Hingers (the key twist)
-
-* A **hinger** is a special active square.
-* Definition: If that square contains exactly **1 counter**, and removing that counter would **increase the number of regions**, then it is a hinger.
-
-Think of it like a “bridge” square connecting two clusters. If you remove it, the cluster splits apart.
-
-Example:
-
-```
-1 1 1
-0 0 0
-```
-
-Here:
-
-* The middle `1` is a **hinger**.
-* Remove it → the left `1` and right `1` become **two separate regions**.
-
----
-
-## Winning condition
-
-* **The moment a player removes a counter from a hinger**, that player **wins immediately**.
-* If the game ends (all squares 0) and nobody removed a hinger, it’s a **draw**.
-
----
-
-## Illegal move
-
-* If a player tries to play on a square that is not active (0 counters), that is **illegal**.
-* In that case, the **other player immediately wins**.
-
----
-
-## Putting it together
-
-So the flow is:
-
-1. Start with a grid of counters.
-2. Players alternate moves, each removing one counter from an active square.
-3. If you remove a hinger, you win instantly.
-4. If you empty the board without touching a hinger, it’s a draw.
-5. If someone makes an illegal move, their opponent wins.
-
----
-
-✨ The “puzzle” for your coursework is:
-
-* To model states, detect hingers, and reason about safe/unsafe paths (sequences of moves that don’t hit a hinger), and then build search/agent strategies around that.
-
----
