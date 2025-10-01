@@ -1,0 +1,338 @@
+Nice — I’ll break this down into a clear, actionable step-by-step plan (no code). I’ll reference the official brief you uploaded as needed. 
+
+# Quick summary
+
+You must implement a Python project (multiple `.py` files) that models the Hinger game and several search/agent components. Deliverables: `a1_state.py`, `a2_path.py`, `a3_agent.py`, `a4_game.py`, plus a 2-page reflection report and a zipped project for submission. See brief for full details and marks. 
+
+---
+
+# Overall checklist (what to finish)
+
+1. `a1_state.py` — implement `State` class + tests.
+2. `a2_path.py` — BFS / DFS / IDDFS / A* safe path finders, `compare()` and (optional) `min_safe`.
+3. `a3_agent.py` — `Agent` class with `minimax` and `alphabeta` modes + tests.
+4. `a4_game.py` — `play(state, agentA, agentB)` loop + tests (human input allowed).
+5. Polish, add header comments (group number + student IDs in every `.py`), create reflection report (≤2 pages), zip & submit with correct filename. 
+
+---
+
+# Step-by-step for each file (actionable, no code)
+
+## 1) `a1_state.py` — build the State model
+
+Goals: represent board, generate legal moves, compute regions and hingers, include `tester()`.
+
+Concrete steps:
+
+* Create `State` class with an instance variable `grid` (2D list of ints).
+* Initialiser: validate input shape and contents (integers ≥0).
+* `__str__`: return readable matrix (rows, spaces).
+* `moves()` generator: for every active cell (count>0), yield a *move description* and the resulting new `State`. Decide a consistent move representation — e.g. `((i,j), cost)` or `((i,j), new_state)`. **Pick one and use it across all modules.**
+* `numRegions()`: implement 8-neighbour flood-fill (DFS/BFS) to count connected active regions (active = count>0).
+* `numHingers()`: for each cell with count==1, simulate removing it (temporary set 0) and recompute `numRegions()`; if regions increase by 1 it's a hinger. (Simpler and robust; mention performance cost in comments.)
+* Utility methods to add:
+
+  * `copy()` or a way to build new `State` objects cleanly.
+  * `move_cost(i,j)` that returns `1 + number_of_active_neighbors`.
+  * `as_binary()` helper to check/convert to binary state if needed.
+  * `serialize()` for hashing (tuple of tuples or string) for visited sets.
+* `tester()`:
+
+  * Construct **State A** from the brief and `print()` it.
+  * Add tests for `moves()`, `numRegions()`, `numHingers()` and `move_cost()` on small boards and edge cases (empty board, single active cell, all active).
+* Add header comment (group number, student IDs). 
+
+Why this order: `State` is used by everything else, so get it correct and well-tested first.
+
+---
+
+## 2) `a2_path.py` — safe path finders and comparison
+
+Goals: implement `path_BFS`, `path_DFS`, `path_IDDFS`, `path_astar`, `compare()` and optionally `min_safe`.
+
+Common implementation notes (for **all** search functions):
+
+* Input: two **binary** states `start` and `end`. Define a canonical state serialization for visited sets (use `State.serialize()`).
+* **Safe path** constraint: **none** of the intermediate states (including start/end) may contain a hinger. So when expanding a child state, skip it if `numHingers() > 0`.
+* Decide path representation: a list of moves (e.g., list of `(i,j)` positions) — document this in comments and keep consistent.
+* Keep metrics in each search: nodes expanded, max frontier size, depth of solution, time taken (use `time.perf_counter()`), path length. `compare()` will use these.
+
+Specific algorithms:
+
+* `path_BFS(start,end)`:
+
+  * Standard BFS queue; return shortest-in-number-of-moves safe path or `None`.
+* `path_DFS(start,end)`:
+
+  * Depth-first search, iterative or recursive. Beware of infinite recursion on cycles — track visited.
+* `path_IDDFS(start,end)`:
+
+  * Iterative deepening depth-first search: repeatedly run depth-limited DFS with increasing depth limit until found or max depth.
+* `path_astar(start,end)`:
+
+  * You must place comments immediately above the function explaining and justifying your heuristic.
+  * **Recommended admissible heuristic for binary states**: **Hamming distance** = number of cells with `1` in current state that must be `0` in the goal (i.e., number of differing active cells). Since each move removes at most one counter and costs ≥1, this is a lower bound on the number of remaining moves, so it is admissible. Use it to guide A*. (Explain this reasoning in the comment block above `path_astar()`.)
+  * Use priority queue (heapq) keyed by `g + h`.
+* `compare()`:
+
+  * Create several test pairs (easy→hard) and record: correctness (does algorithm find a safe path?), nodes expanded, time (ms), path length, total cost (if you track costs), max memory (frontier size).
+  * Print or return summary table (could be a list of dicts).
+* `min_safe(start,end)` [*optional but recommended]:
+
+  * Input: non-binary states; objective: find a safe path with **minimal total cost** (sum of move costs).
+  * Recommendation & justification: **Dijkstra** (or A* with admissible heuristic) is appropriate because move costs are positive and you want minimal cost. If you choose A*, document an admissible heuristic (e.g., number of total counters to remove × 1). If you implement Dijkstra, explain it in comments.
+  * Return: minimal-cost path (list of moves) or `None`.
+* `tester()`:
+
+  * Build simple examples where safe paths exist and do not exist. Use `compare()` to show differences.
+
+Performance tips:
+
+* Use efficient state serialization (tuple of tuples) for `visited` and dictionary keys.
+* When expanding moves, avoid creating heavy deep copies unless necessary — but correctness first.
+* Document complexity in comments. 
+
+---
+
+## 3) `a3_agent.py` — Agent with minimax & alpha-beta
+
+Goals: implement an `Agent` class that can return a legal move using several strategies.
+
+Concrete steps:
+
+* `Agent` class fields: `name` (string), `modes` (list), default group name (e.g., `"A9"`).
+* Initialiser arguments: `size` (tuple `(m,n)`) and optional `name`.
+* `__str__` for readable representation.
+* `move(state, mode)`:
+
+  * Input: a `State` object (board). Mode default should be your "best" strategy (choose alpha-beta).
+  * If `state` has no active cells return `None`.
+  * Depending on `mode`, call the relevant planner (`minimax`, `alphabeta`, other).
+  * Return a legal move position `(i,j)` (or `None`) — keep representation consistent with `a2_path.py`.
+* Implement **minimax**:
+
+  * Work on **binary** states (nice simplification).
+  * Terminal node conditions:
+
+    * A move on a hinger -> immediate win for the mover.
+    * No active cells -> draw.
+  * Depth limit: you must include an option to limit search depth to keep runtime reasonable; document and test various depths.
+  * Evaluation function ideas (for non-terminal, depth-limited nodes):
+
+    * If current player can immediately take a hinger -> very high score.
+    * If opponent can take a hinger on next move -> very low score.
+    * Otherwise, score = (−) number of hingers for opponent, (−) number of active regions, or a weighted sum of features: `w1*(#my_moves - #opponent_moves) + w2*(#regions difference) + w3*(#hinger potentials)`.
+    * Keep the heuristic simple and justify choices in comments.
+* Implement **alpha-beta pruning**:
+
+  * Same as minimax but with pruning and move ordering heuristics (try good moves first — e.g., moves that reduce opponent options).
+* `tester()`:
+
+  * Simulate small boards and check moves produced by the agent under both modes.
+  * (Optional) pit agents against each other and collect win/draw stats.
+* Extra/optional:
+
+  * Implement other modes (MCTS) if you have time — mark these as optional starred items.
+  * Implement `win(state)` method [*] only if confident: determine if player to move has forced win (nontrivial): can attempt recursive solver with memoization, but this may be expensive — comment that it's optional. 
+
+---
+
+## 4) `a4_game.py` — main gameplay loop
+
+Goals: implement `play(state, agentA, agentB)` with human/agent support.
+
+Concrete steps:
+
+* `play(state, agentA, agentB)` behavior:
+
+  * Turn alternates starting with agentA.
+  * For an agent: call `agent.move(state, mode)`; for human: prompt input (row,col).
+  * Validate move: the chosen cell must exist and have count>0. If illegal, end game and declare the *opponent* winner (as brief specifies).
+  * Compute move cost (use `State.move_cost(i,j)` for recording).
+  * Apply move: decrement counter by 1. Check if the move was on a hinger (i.e., if the cell had count==1 and removing it increased `numRegions()` by 1); if yes, declare mover as winner and return their name.
+  * If all counters are zero and no hinger triggered, declare draw (`None`).
+  * Maintain move history: list of `(player, (i,j), cost, remaining_counters)`.
+* Add `tester()` demonstrating:
+
+  * Agent vs Agent, Agent vs Human (console), and small hand-crafted board scenarios: immediate hinger win, forced draw, illegal moves.
+* Optional features (starred in brief):
+
+  * Timing per turn (use `time.perf_counter()`) and enforce turn time limit.
+  * Save move history to file for replay.
+  * GUI (Pygame) only if you want to go beyond basic requirements.
+* Make sure to handle exceptions gracefully (invalid input in human mode). 
+
+---
+
+# Cross-cutting implementation choices & tips
+
+* **State hashing/serialization**: use an immutable representation for visited sets (tuple of tuples or string). Put method like `serialize()` in `State`.
+* **Representation of a move**: pick and document one consistent format: e.g. `(i,j)` for position and `move_cost(i,j)` as separate call when needed, or return `(i,j,cost)` from `moves()`. Consistency is crucial across modules.
+* **Testing**: write many small unit scenarios. In Spyder you can run each `tester()` by running the file directly.
+* **Performance**:
+
+  * For `numRegions()` use iterative stack DFS (avoid recursion depth issues on large boards).
+  * For path searches, track nodes expanded (increment a counter whenever you pop/expand a node).
+  * For A*: implement closed set (visited with best g-value) to avoid re-expansion.
+* **Docstrings & comments**: explain heuristics (brief requires justifications above A* and min_safe). Add header in each file with group and student IDs — files without headers **won’t** be marked. 
+
+---
+
+# Testing & evaluation (`compare()` specifics)
+
+Have `compare()` run several scenarios and report for each algorithm:
+
+* Found path? (Y/N)
+* Path length (# moves)
+* Total cost (if tracked)
+* Nodes expanded
+* Time (ms)
+* Max frontier size (approx memory)
+* Use a small set of test pairs ordered by difficulty — include cases with no safe path.
+  This will feed into your reflection report (Task 5).
+
+---
+
+# Deliverables & formatting reminders
+
+* Every `.py` must include the header comment with: group number, your student ID, and partner student IDs (use template `header.py` on Blackboard if needed). Files without this header will not be marked. 
+* Reflection report: **max two pages**, 4 sections listed in brief — save as `GroupName_StudentID.pdf`.
+* Zip the project folder (only module files + reflection PDF, no subfolders) and name it per brief (e.g., `A9_12345678.zip`). Submit via Blackboard before the deadline. 
+
+---
+
+# Suggested schedule (one-page plan you can follow)
+
+(You can adapt depending on how many people in your group)
+
+Day 1–2 (now): Implement `a1_state.py`, write tests for `numRegions`, `moves`, `numHingers`.
+Day 3–7: Implement `a2_path.py` BFS/DFS/IDDFS + `tester()`; test small examples.
+Day 8–11: Implement `path_astar()` with heuristic and `compare()` function.
+Day 12–15: Implement `min_safe()` (Dijkstra/A*) if time permits; optimize & profile.
+Day 16–18: Implement `a3_agent.py` with `minimax` and `alphabeta` (depth-limit + evaluation).
+Day 19–21: Implement `a4_game.py` and test end-to-end Agent vs Agent and human scenarios.
+Day 22–23: Polish, add comments, run `compare()` tests, produce sample outputs.
+Day 24: Write reflection report, finalize headers, zip, final run and submit (deadline: **24 Oct 2025 15:00**). 
+
+---
+
+# Common pitfalls & final checklist (quick)
+
+* [ ] Every `.py` has the required header with group + student IDs. 
+* [ ] Use only allowed libraries (stdlib + matplotlib; pygame optional for Task 4). 
+* [ ] Keep representations consistent (moves, state serialization).
+* [ ] Test `numHingers()` carefully (simulate removal to confirm increase in regions).
+* [ ] In path searches, enforce **safe path** rule: reject intermediate states containing any hinger.
+* [ ] In `a4_game.play()`, illegal moves cause immediate loss for offender.
+* [ ] Include `tester()` in each file and run them in Spyder.
+* [ ] Zip only required files (no subfolders) and name zip correctly. 
+
+---
+
+
+
+
+
+
+
+GAME EXPLANATION:
+
+Got it — the brief uses a lot of formal/academic phrasing, so let me re-explain the **Hinger game** in plain English.
+
+---
+
+## The board
+
+* The board is an **m×n grid**.
+* Each square (cell) contains a **non-negative integer counter**:
+
+  * `0` means the square is **empty** (inactive).
+  * `>0` means the square is **active** and contains that many counters.
+
+Example:
+
+```
+2 0 1
+1 1 0
+0 0 0
+```
+
+Here:
+
+* Top-left has 2 counters (active).
+* Top-right has 1 counter (active).
+* Others are either 1 (active) or 0 (empty).
+
+---
+
+## Moves
+
+* Players take turns.
+* On your turn:
+
+  1. **Pick one active square** (count > 0).
+  2. **Remove exactly one counter** from it.
+  3. That square’s number goes down by 1. If it becomes 0, the square becomes inactive.
+
+---
+
+## Regions
+
+* A **region** = a connected cluster of active squares (≥1 counter).
+* Connectivity uses **8 directions** (N, NE, E, SE, S, SW, W, NW).
+* Example: if you have active counters at (0,0) and (0,1), they’re in the same region because they’re side by side.
+
+---
+
+## Hingers (the key twist)
+
+* A **hinger** is a special active square.
+* Definition: If that square contains exactly **1 counter**, and removing that counter would **increase the number of regions**, then it is a hinger.
+
+Think of it like a “bridge” square connecting two clusters. If you remove it, the cluster splits apart.
+
+Example:
+
+```
+1 1 1
+0 0 0
+```
+
+Here:
+
+* The middle `1` is a **hinger**.
+* Remove it → the left `1` and right `1` become **two separate regions**.
+
+---
+
+## Winning condition
+
+* **The moment a player removes a counter from a hinger**, that player **wins immediately**.
+* If the game ends (all squares 0) and nobody removed a hinger, it’s a **draw**.
+
+---
+
+## Illegal move
+
+* If a player tries to play on a square that is not active (0 counters), that is **illegal**.
+* In that case, the **other player immediately wins**.
+
+---
+
+## Putting it together
+
+So the flow is:
+
+1. Start with a grid of counters.
+2. Players alternate moves, each removing one counter from an active square.
+3. If you remove a hinger, you win instantly.
+4. If you empty the board without touching a hinger, it’s a draw.
+5. If someone makes an illegal move, their opponent wins.
+
+---
+
+✨ The “puzzle” for your coursework is:
+
+* To model states, detect hingers, and reason about safe/unsafe paths (sequences of moves that don’t hit a hinger), and then build search/agent strategies around that.
+
+---
