@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-Header
+Group B8
 
+Authors:
+Luca Harper-Daude
+100415489
 
-Spyder Editor
+Rhys Kennedy
+100426892
 
-This is a temporary script file.
+Alan Bzozovskij
+100437079
+
 """
 
