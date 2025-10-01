@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Group B8
+Hinger Project
+Coursework 001
 
-Authors:
-Luca Harper-Daude
-100415489
-
-Rhys Kennedy
-100426892
-
-Alan Bzozovskij
-100437079
+@Authors: B8 (100415489, 100426892, 100437079)
 
 """
+
 
