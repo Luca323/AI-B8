@@ -43,52 +43,68 @@ class State:
                 if next_st:
                     yield next_st
                     
-    def numRegions(self) -> int:
-        connections = []
-        for i in range (self.dimensions[0]):
-            for j in range(self.dimensions[1]):
-                if self.grid[i][j] != 0:
-                    connections.append((i, j)) #Record coordinates of all points
                     
-        for c in connections:
-            pass
-        
-        
-        pass
+    def numRegions(self) -> int: #detects clusters
+        coords = [(i, j)
+              for i in range(self.dimensions[0])
+              for j in range(self.dimensions[1])
+              if self.grid[i][j] != 0] #Collect coords of all points
+
+        if not coords:
+            return 0 #Throw 0 if no regions exist
     
-    '''
-    def numRegions(self) -> int:
-        r = 0 #initialise 0
-        for i in range (self.dimensions[0]):
-            c = 0
-            for j in range(self.dimensions[1]):
-                if self.grid[i][j] > 0:
-                    c +=1
-                elif c>0:
-                    c = 0
-                    r +=1
-            if c>1:
-                r +=1
-                    
-        return r
-    '''
+        coords = set(coords)
+        unvisited = set(coords)
+        regions = 0
+    
+        #all possible neighbor directions
+        neighbors = [
+            (-1, -1), (-1, 0), (-1, 1),
+            (0, -1),(0, 1), (1, -1),  (1, 0), (1, 1)
+            ]
+    
+        while unvisited:
+            regions += 1
+            #start from one point
+            to_check = [unvisited.pop()]
+            checked = set(to_check)
+    
+            i = 0
+            while i < len(to_check):
+                r, c = to_check[i]
+                for dr, dc in neighbors:
+                    n = (r + dr, c + dc)
+                    if n in unvisited:
+                        unvisited.remove(n)
+                        to_check.append(n)
+                i += 1
+    
+        return regions
+    
+    def num_Hingers(self) -> int:
+        h = 0
+        for s in self.moves():
+            if s.numRegions != self.numRegions():
+                h += 1
+        return h
+    
+        
 
 def tester() -> None:    
-    examp = [[0,0,1,2], [0, 0, 2,0], [0, 2, 0, 1]]
+    examp = [[1,0,1,2], [0, 0, 0,0], [0, 2, 0, 1]]
     
     test = []
     
     s = State(grid=examp)
-    print(s, "\n")
-   
+    print(s, "\n") 
     
-    
-    s.numRegions()
-    
-    
+    '''
     test.append(s.moves)
     for m in s.moves():
         print(m, "\n")
+    '''
+    print(f'Number of Regions: {s.numRegions()}')
+    print(f'Number of hinger cells: {s.num_Hingers()}')
         
 if __name__ == "__main__":
     tester()
