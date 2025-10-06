@@ -43,6 +43,9 @@ class State:
                 if next_st:
                     yield next_st
                     
+    def inRegion(self):
+        pass
+                    
     def numRegions(self) -> int:
         r = 0 #initialise 0
         for i in range (self.dimensions[0]):
@@ -55,7 +58,6 @@ class State:
                     r +=1
             if c>1:
                 r +=1
-                    
                     
         return r
 
