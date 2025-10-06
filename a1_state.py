@@ -14,7 +14,6 @@ class State:
         if self.grid == o.grid:
             return True
         
-        
     def __str__(self) -> str:
         return f"Dimensions: {self.dimensions}\n" + "\n\n".join("   ".join(str(x) for x in row) for row in self.grid)
     
@@ -35,7 +34,6 @@ class State:
         
         return None
     
-         
     def moves(self) -> 'State': #Yields all available moves 
         for i in range (self.dimensions[0]): 
             for j in range(self.dimensions[1]): 
@@ -53,8 +51,8 @@ class State:
         if not coords:
             return 0 #Throw 0 if no regions exist
     
-        coords = set(coords)
-        unvisited = set(coords)
+        coords = set(coords) #open
+        unvisited = set(coords) #Closed
         regions = 0
     
         #all possible neighbor directions
@@ -63,9 +61,9 @@ class State:
             (0, -1),(0, 1), (1, -1),  (1, 0), (1, 1)
             ]
     
-        while unvisited:
+        while unvisited: #Goes through all points
             regions += 1
-            #start from one point
+
             to_check = [unvisited.pop()]
             checked = set(to_check)
     
@@ -84,27 +82,29 @@ class State:
     def num_Hingers(self) -> int:
         h = 0
         for s in self.moves():
-            if s.numRegions() > self.numRegions()+1:
+            if s.numRegions() > self.numRegions():
                 h += 1
-        return h
+        return h #Defines a hinger as any move that increases the number of regions
     
         
+def tester() -> None:
 
-def tester() -> None:    
-    examp = [[1,0,1,2], [0, 0, 1,0], [0, 2, 0, 1]]
+    grd = [[1,1,0,0,2],
+          [1,1,0,0,0],
+          [0,0,1,1,1],
+          [0,0,0,1,1]]
     
-    test = []
+    sa = State(grid = grd)
     
-    s = State(grid=examp)
-    print(s, "\n") 
+    print(sa)
+    print(f'\nNumber of Regions: {sa.numRegions()} \nNumber of Hinger Cells: {sa.num_Hingers()}')
     
-    '''
-    test.append(s.moves)
-    for m in s.moves():
-        print(m, "\n")
-    '''
-    print(f'Number of Regions: {s.numRegions()}')
-    print(f'Number of hinger cells: {s.num_Hingers()}')
+    print("\nAvailable moves:")
+    for m in sa.moves():
+        print(m, "\n\n")
+        
+        
+
         
 if __name__ == "__main__":
     tester()
