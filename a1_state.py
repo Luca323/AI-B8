@@ -84,14 +84,14 @@ class State:
     def num_Hingers(self) -> int:
         h = 0
         for s in self.moves():
-            if s.numRegions != self.numRegions():
+            if s.numRegions() > self.numRegions()+1:
                 h += 1
         return h
     
         
 
 def tester() -> None:    
-    examp = [[1,0,1,2], [0, 0, 0,0], [0, 2, 0, 1]]
+    examp = [[1,0,1,2], [0, 0, 1,0], [0, 2, 0, 1]]
     
     test = []
     
