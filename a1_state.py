@@ -63,14 +63,12 @@ def tester() -> None:
     
     
     print(s.numRegions())
-    '''
-    if s==d:
-        print("THEY ARE THE SAME")
+    
     
     test.append(s.moves)
     for m in s.moves():
         print(m, "\n")
-        '''
+        
     
         
 tester()
