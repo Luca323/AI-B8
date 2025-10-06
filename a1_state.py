@@ -43,9 +43,20 @@ class State:
                 if next_st:
                     yield next_st
                     
-    def inRegion(self):
-        pass
+    def numRegions(self) -> int:
+        connections = []
+        for i in range (self.dimensions[0]):
+            for j in range(self.dimensions[1]):
+                if self.grid[i][j] != 0:
+                    connections.append((i, j)) #Record coordinates of all points
                     
+        for c in connections:
+            pass
+        
+        
+        pass
+    
+    '''
     def numRegions(self) -> int:
         r = 0 #initialise 0
         for i in range (self.dimensions[0]):
@@ -60,6 +71,7 @@ class State:
                 r +=1
                     
         return r
+    '''
 
 def tester() -> None:    
     examp = [[0,0,1,2], [0, 0, 2,0], [0, 2, 0, 1]]
@@ -71,13 +83,12 @@ def tester() -> None:
    
     
     
-    print(s.numRegions())
+    s.numRegions()
     
     
     test.append(s.moves)
     for m in s.moves():
         print(m, "\n")
         
-    
-        
-tester()
+if __name__ == "__main__":
+    tester()
