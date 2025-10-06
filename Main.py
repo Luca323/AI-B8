@@ -7,4 +7,5 @@ Coursework 001
 
 """
 
+print("Hello world!")
 
