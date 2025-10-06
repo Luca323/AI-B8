@@ -1,3 +1,10 @@
+"""
+Hinger Project
+Coursework 001
+
+@Authors: B8 (100415489, 100426892, 100437079)
+"""
+
 class State:
     def __init__(self, grid):
         self.grid = grid
