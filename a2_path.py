@@ -6,6 +6,7 @@ Coursework 001
 """
 
 from a1_state import State
+from collections import deque
 
 # Depth First Search
 def path_DFS(start, end):
@@ -31,6 +32,30 @@ def path_DFS(start, end):
 
     return dfs(start, [])
 
+
+def path_BFS(start: State, end: State):
+    queue = deque([(start, [start])])
+    closed = [start]
+    start_regions = start.numRegions()
+    
+    while queue:
+        current, path = queue.popleft()
+        
+        if current == end:
+            return path
+        
+        
+        for nxt_st in current.moves():
+            if nxt_st.numRegions() > start_regions:
+                continue #Ignores any unsafe moves
+            
+            if all(nxt_st != v for v in closed):
+                closed.append(nxt_st)
+                queue.append((nxt_st, path + [nxt_st]))
+                
+    return None
+            
+    
 
 # Iterative Deepening Depth First Search
 def path_IDDFS(start, end, max_depth=20):
@@ -74,7 +99,7 @@ def tester():
     ]
 
     end_grid = [
-        [0, 0, 0],
+        [1, 0, 0],
         [0, 0, 0],
         [0, 0, 0]
     ]
@@ -82,7 +107,7 @@ def tester():
     start = State(start_grid)
     end = State(end_grid)
 
-    path = path_DFS(start, end)
+    path = path_BFS(start, end)
 
     if path is None:
         print("No path found.")
