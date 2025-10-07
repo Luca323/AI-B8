@@ -4,14 +4,13 @@ Coursework 001
 
 @Authors: B8 (100415489, 100426892, 100437079)
 """
-
 from a1_state import State
 
 # Depth First Search
-def path_DFS(start, end):
+def path_BFS(start, end):
     visited = []
 
-    def dfs(current, path):
+    def bfs(current, path):
         # Stop if the current state matches the goal
         if current == end:
             return path
@@ -24,12 +23,12 @@ def path_DFS(start, end):
             already_visited = any(next_state == v for v in visited)
             if not already_visited:
                 # For now, treat all states as safe (no hinger logic yet)
-                result = dfs(next_state, path + [next_state])
+                result = bfs(next_state, path + [next_state])
                 if result is not None:
                     return result
         return None
 
-    return dfs(start, [])
+    return bfs(start, [])
 
 
 # --- Tester ---
@@ -50,7 +49,7 @@ def tester():
     start = State(start_grid)
     end = State(end_grid)
 
-    path = path_DFS(start, end)
+    path = path_BFS(start, end)
 
     if path is None:
         print("No path found.")
