@@ -32,9 +32,40 @@ def path_DFS(start, end):
     return dfs(start, [])
 
 
+# Iterative Deep Depth First Search
+def path_IDDFS(start, end, max_depth=20):
+
+    # Inner recursive DFS with depth limit
+    def dfs_limited(current, end, path, depth):
+        if current == end:
+            return path
+        if depth == 0:
+            return None
+
+        for next_state in current.moves():
+            # avoid cycles by not revisiting states already in current path
+            if not any(next_state == p for p in path):
+                # safe-state check could go here once numHinges() is ready
+                result = dfs_limited(next_state, end, path + [next_state], depth - 1)
+                if result is not None:
+                    return result
+        return None
+
+    # Iteratively increase the allowed search depth
+    for limit in range(1, max_depth + 1):
+        print(f"Searching with depth limit {limit}")
+        result = dfs_limited(start, end, [start], limit)
+        if result is not None:
+            print(f"Solution found at depth {limit}")
+            return result
+
+    print("No path found within the maximum depth limit.")
+    return None
+
+
 # --- Tester ---
 def tester():
-    print("Running path_DFS tester...\n")
+    print("Running tester...\n")
     start_grid = [
         [1, 1, 0],
         [2, 0, 1],
@@ -50,10 +81,11 @@ def tester():
     start = State(start_grid)
     end = State(end_grid)
 
-    path = path_DFS(start, end)
+    # path = path_DFS(start, end)
+    path = path_IDDFS(start, end, max_depth = 10)
 
     if path is None:
-        print("No path found.")
+        print("No Path Found.")
     else:
         print(f"Path found with {len(path)} steps:\n")
         for i, step in enumerate(path):
