@@ -13,6 +13,7 @@ import heapq
 # Depth First Search
 def path_DFS(start, end):
     visited = []
+    s_regions = start.numRegions()
 
     def dfs(current, path):
         # Stop if the current state matches the goal
@@ -24,8 +25,10 @@ def path_DFS(start, end):
         # Expand next moves
         for next_state in current.moves():
             # Check if we've already seen this exact grid
+            if next_state.numRegions() > s_regions:
+                continue
             already_visited = any(next_state == v for v in visited)
-            if not already_visited and next_state.numRegions == start.numRegions():
+            if not already_visited:
                 # For now, treat all states as safe (no hinger logic yet)
                 result = dfs(next_state, path + [next_state])
                 if result is not None:
@@ -61,6 +64,7 @@ def path_BFS(start: State, end: State):
 
 # Iterative Deepening Depth First Search
 def path_IDDFS(start, end, max_depth=20):
+    s_regions = start.numRegions()
 
     # Inner recursive DFS with depth limit
     def dfs_limited(current, end, path, depth):
@@ -70,6 +74,8 @@ def path_IDDFS(start, end, max_depth=20):
             return None
 
         for next_state in current.moves():
+            if next_state.numRegions() > s_regions: 
+                continue #Disallows unsafe moves
             # avoid cycles by not revisiting states already in current path
             if not any(next_state == p for p in path):
                 # safe-state check could go here once numHinges() is ready
@@ -120,7 +126,7 @@ def tester():
     start = State(start_grid)
     end = State(end_grid)
 
-    path = path_BFS(start, end)
+    path = path_DFS(start, end)
 
     if path is None:
         print("No path found.")
