@@ -88,10 +88,10 @@ def path_IDDFS(start, end, max_depth=20):
 
     # Iteratively increase the allowed search depth
     for limit in range(1, max_depth + 1):
-        print(f"Searching with depth limit {limit}...")
+        #print(f"Searching with depth limit {limit}...")
         result = dfs_limited(start, end, [start], limit)
         if result is not None:
-            print(f"Solution found at depth {limit}.")
+            #print(f"Solution found at depth {limit}.")
             return result
 
     print("No path found within the maximum depth limit.")
