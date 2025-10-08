@@ -8,6 +8,7 @@ Coursework 001
 from a1_state import State
 from collections import deque
 import heapq
+import itertools
 
 
 # Depth First Search
@@ -97,20 +98,67 @@ def path_IDDFS(start, end, max_depth=20):
 
 
 
-# A Star Algorithm
+# A* Algorithm
 def path_astar(start, end):
-    
-    # Creating a heap of tuples (a priority queue)
+    s_regions = start.numRegions()  # number of regions in the start state
+
+    # Priority queue of tuples: (f, counter, g, state, path)
     prioqueue = []
-    heapq.heappush(prioqueue, (0, 0, start, [start] ))
-    
-    # Record the best g(n) found for each visited position
-    visited = {start: 0}
+    counter = itertools.count()  # unique sequence count for tie-breaking
+    heapq.heappush(prioqueue, (0, next(counter), 0, start, [start]))
+
+    # List of visited states
+    visited = [start]
+
+    # Heuristic: count how many cells differ between two grids
+    def heuristic(a, b):
+        # Compare all corresponding cells in both grids
+        return sum(
+            cell_a != cell_b
+            for row_a, row_b in zip(a.grid, b.grid)
+            for cell_a, cell_b in zip(row_a, row_b)
+        )
+
+    while prioqueue:
+        # Take the state with the lowest total estimated cost (f = g + h)
+        f_score, _, g_score, current, path = heapq.heappop(prioqueue)
+
+        # If we've reached the goal, return the path
+        if current == end:
+            return path
+
+        # Explore all possible moves from the current state
+        for next_state in current.moves():
+            # Skip unsafe states (those that increase the number of regions)
+            if next_state.numRegions() > s_regions:
+                continue
+
+            # Skip already visited states
+            if any(next_state == v for v in visited):
+                continue
+
+            # Each move costs 1 more step
+            new_g = g_score + 1
+
+            # Estimate how far we are from the goal
+            h = heuristic(next_state, end)
+
+            # Total estimated cost (f = g + h)
+            f = new_g + h
+
+            # Mark this state as visited
+            visited.append(next_state)
+
+            # Push into the priority queue (with tie-breaker counter)
+            heapq.heappush(prioqueue, (f, next(counter), new_g, next_state, path + [next_state]))
+
+    # If no path found, return None
+    return None
 
 
 # --- Tester ---
 def tester():
-    print("Running path_DFS tester...\n")
+    print("Running path tester...\n")
     start_grid = [
         [1, 1, 0],
         [2, 0, 1],
@@ -126,7 +174,8 @@ def tester():
     start = State(start_grid)
     end = State(end_grid)
 
-    path = path_DFS(start, end)
+    # path = path_DFS(start, end)
+    path = path_astar(start, end)
 
     if path is None:
         print("No path found.")
