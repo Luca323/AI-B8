@@ -23,7 +23,7 @@ def path_DFS(start, end):
         for next_state in current.moves():
             # Check if we've already seen this exact grid
             already_visited = any(next_state == v for v in visited)
-            if not already_visited:
+            if not already_visited and next_state.numRegions == start.numRegions():
                 # For now, treat all states as safe (no hinger logic yet)
                 result = dfs(next_state, path + [next_state])
                 if result is not None:
@@ -47,7 +47,7 @@ def path_BFS(start: State, end: State):
         
         for nxt_st in current.moves():
             if nxt_st.numRegions() > start_regions:
-                continue #Ignores any unsafe moves
+                continue #Ignores any unsafe moves i.e taking hinger cells
             
             if all(nxt_st != v for v in closed):
                 closed.append(nxt_st)
