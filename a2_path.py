@@ -101,6 +101,7 @@ def path_IDDFS(start, end, max_depth=20):
 
 # A* Algorithm
 def path_astar(start, end):
+    
     s_regions = start.numRegions()  # number of regions in the start state
 
     # Priority queue of tuples: (f, counter, g, state, path)
