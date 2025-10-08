@@ -26,7 +26,15 @@ class Agent:
             if not mode:
                 return moves[0] #Makes first available move
             
+            if mode == 'alphabeta':
+                pass
+            
+            if mode == 'minimax':
+                pass
+            
         return None
+    
+    
     
     def win(self, st: State) -> bool:
         if st.num_Hingers() > 0:
