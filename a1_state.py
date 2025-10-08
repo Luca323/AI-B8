@@ -51,8 +51,8 @@ class State:
         if not coords:
             return 0 #Throw 0 if no regions exist
     
-        coords = set(coords) #open
-        unvisited = set(coords) #Closed
+        coords = set(coords)
+        unvisited = set(coords) #Open coordinates
         regions = 0
     
         #all possible neighbor directions
@@ -65,7 +65,6 @@ class State:
             regions += 1
 
             to_check = [unvisited.pop()]
-            checked = set(to_check)
     
             i = 0
             while i < len(to_check):
