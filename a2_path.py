@@ -7,6 +7,8 @@ Coursework 001
 
 from a1_state import State
 from collections import deque
+import heapq
+
 
 # Depth First Search
 def path_DFS(start, end):
@@ -87,6 +89,17 @@ def path_IDDFS(start, end, max_depth=20):
     print("No path found within the maximum depth limit.")
     return None
 
+
+
+# A Star Algorithm
+def path_astar(start, end):
+    
+    # Creating a heap of tuples (a priority queue)
+    prioqueue = []
+    heapq.heappush(prioqueue, (0, 0, start, [start] ))
+    
+    # Record the best g(n) found for each visited position
+    visited = {start: 0}
 
 
 # --- Tester ---
