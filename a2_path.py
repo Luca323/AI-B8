@@ -9,6 +9,7 @@ from a1_state import State
 from collections import deque
 import heapq
 import itertools
+import time
 
 
 # Depth First Search
@@ -155,6 +156,44 @@ def path_astar(start, end):
     # If no path found, return None
     return None
 
+def compare(start, end, bfs_fn, dfs_fn, iddfs_fn, astar_fn, max_depth=20):
+    
+    algorithms = {
+        "BFS": bfs_fn,
+        "DFS": dfs_fn,
+        "IDDFS": lambda s, e: iddfs_fn(s, e, max_depth=max_depth),
+        "A*": astar_fn
+    }
+    
+    results = []
+
+    for name, fn in algorithms.items():
+        start_time = time.time()
+        path = fn(start, end)
+        end_time = time.time()
+        
+        runtime = end_time - start_time
+        correctness = path is not None
+        
+        path_length = len(path) if path else None
+        
+        results.append({
+            "Algorithm": name,
+            "Correct": correctness,
+            "Runtime (s)": round(runtime, 6),
+            "Path Length": path_length
+        })
+    
+    # Print results in a readable table
+    print("{:<10} {:<10} {:<12} {:<12}".format("Algorithm", "Correct", "Runtime (s)", "Path Length"))
+    print("-" * 46)
+    for r in results:
+        print("{:<10} {:<10} {:<12} {:<12}".format(
+            r["Algorithm"], str(r["Correct"]), r["Runtime (s)"], str(r["Path Length"])
+        ))
+
+    
+
 
 # --- Tester ---
 def tester():
@@ -175,14 +214,17 @@ def tester():
     end = State(end_grid)
 
     # path = path_DFS(start, end)
-    path = path_astar(start, end)
-
-    if path is None:
-        print("No path found.")
-    else:
-        print(f"Path found with {len(path)} steps:\n")
-        for i, step in enumerate(path):
-            print(f"Step {i+1}:\n{step}\n")
+    # path = path_astar(start, end)
+    compare(start, end, path_BFS, path_DFS, path_IDDFS, path_astar, max_depth=20)
+    
+    
+    # Uncomment this if you're NOT running compare
+    #if path is None:
+     #   print("No path found.")
+    #else:
+     #   print(f"Path found with {len(path)} steps:\n")
+      #  for i, step in enumerate(path):
+       #     print(f"Step {i+1}:\n{step}\n")
 
 
 if __name__ == "__main__":
