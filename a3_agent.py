@@ -37,7 +37,7 @@ class Agent:
     
     
     def win(self, st: State) -> bool:
-        if st.num_Hingers() > 0:
+        if st.num_Hingers() > 0: #If a hinger cell is available, then the game can be won in one move
             
             return True
         
