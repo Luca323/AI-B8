@@ -98,7 +98,7 @@ class Agent:
         return False
     
 def agent_tester():
-    grid = [[0,1,1,1],[0,0,1,1],[1,1,1,0],[0,0,1,0]]
+    grid = [[1,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]
     sa = State(grid)
     
     print(sa,f"\nNum of Hingers: {sa.num_Hingers()}")
@@ -106,10 +106,20 @@ def agent_tester():
     
     
     minimax_agent = Agent("mm Tester", sa.dimensions)
+    bm = minimax_agent.move(sa, mode='minimax')
+    c = 0
     
-    bm = minimax_agent.move(sa, mode='minimax') if not minimax_agent.win(sa) else "Winning State"
+    while True:
+        if not minimax_agent.win(sa):
+            bm = minimax_agent.move(sa, mode='minimax') 
+            sa = bm
+            c +=1
+        else:
+            bm = "Winning State"
+            print(bm, f"in {c} moves")
+            break
     
-    print("Best Move: \n",bm)
+        print("\nBest Move:\n",bm)
 
 if __name__ == "__main__":
     agent_tester()
