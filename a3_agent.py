@@ -5,7 +5,6 @@ Coursework 001
 @Authors: B8 (100415489, 100426892, 100437079)
 """
 from a1_state import State
-from a2_path import *
 from math import inf
 
 class Agent:
@@ -132,19 +131,23 @@ class Agent:
     
     
     
-    def win(self, st: State) -> bool:
-        return st.num_Hingers() > 0 #If a hinger cell is available, then the game can be won in one move
+    def win(self, st: State, isMove=True) -> bool:
+        if st.num_Hingers() > 0 and isMove:
+            
+            return True #If a hinger cell is available, then the game can be won in one move
+        
+        return False
     
 def agent_tester():
-    grid = [[1,0,1,1],[1,1,1,0],[0,1,0,1],[1,1,1,1]]
+    grid = [[1,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]
     sa = State(grid)
     
     print(sa,f"\nNum of Hingers: {sa.num_Hingers()}")
     
     
-    minimax_agent = Agent("Billy Jean", sa.dimensions)
-    bm = minimax_agent.move(sa, mode='minimax')
-    c = 0
+    minimax_agent = Agent("Bobby Jean", sa.dimensions)
+    bm = minimax_agent.move(sa, mode='alphabeta')
+    c = 1
     
     while True:
         if not minimax_agent.win(sa):
