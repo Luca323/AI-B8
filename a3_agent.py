@@ -104,8 +104,7 @@ def agent_tester():
     print(sa,f"\nNum of Hingers: {sa.num_Hingers()}")
     
     
-    
-    minimax_agent = Agent("mm Tester", sa.dimensions)
+    minimax_agent = Agent("Billy Jean", sa.dimensions)
     bm = minimax_agent.move(sa, mode='minimax')
     c = 0
     
