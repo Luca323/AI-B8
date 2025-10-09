@@ -19,10 +19,10 @@ class Agent:
     
     def evaluate(self, st: State, parent_reg: int) -> int:
         if st.numRegions() > parent_reg:
-            return 9999 #Adds large bias for taking hinger cells
+            return inf #Adds large bias for taking hinger cells
         
         active_cells = sum(sum(1 for val in row if val != 0) for row in st.grid)
-        return active_cells
+        return -active_cells
     
     def is_terminal(self, st: State, parent_reg=None) -> bool:
         if parent_reg:
@@ -61,9 +61,50 @@ class Agent:
                     min_eval, best_state = eval_score, nxt_st
                     
             return min_eval, best_state
+     
+        
+    def alphabeta(self, st: State, depth: int, alpha: int, beta: int, maximising: bool, parent_reg=None) -> tuple:
+         r = st.numRegions()
+         
+         if depth == 0 or self.is_terminal(st, parent_reg):
+             if parent_reg:
+                 score = self.evaluate(st, parent_reg)
+             else:
+                 score = self.evaluate(st, r)
+             return score, st
+         
+         best_state = None
+         
+         if maximising:
+             max_eval = -inf
+             for nxt_st in st.moves():
+                 eval_score ,_ = self.alphabeta(nxt_st, depth-1, alpha, beta, False, r)
+                 
+                 if eval_score > max_eval:
+                     max_eval, best_state = eval_score, nxt_st
+                     
+                 alpha = max(alpha, eval_score)
+                 if beta <= alpha:
+                     break
+                     
+             return max_eval, best_state
+         
+         else:
+             min_eval = inf
+             for nxt_st in st.moves():
+                 eval_score ,_ = self.alphabeta(nxt_st, depth-1, alpha, beta, True, r)
+                 
+                 if eval_score < min_eval:
+                     min_eval, best_state = eval_score, nxt_st
+                
+                 beta = min(eval_score, beta)
+                 if beta <= alpha:
+                     break
+                 
+             return min_eval, best_state
             
             
-    def move(self, st: State, mode=None) -> State:
+    def move(self, st: State, mode='alphabeta') -> State:
         moves = []
         best_move = None
         best_score = -inf
@@ -73,11 +114,12 @@ class Agent:
             
         if len(moves) > 0:
             
-            if not mode:
-                best_move = moves[0] #Makes first available move
-            
             if mode == 'alphabeta':
-                pass
+                for m in moves:
+                    score,_ = self.alphabeta(m, depth=3, alpha= -inf, beta=inf, maximising=False)
+                    if score > best_score:
+                        best_score = score
+                        best_move = m
             
             if mode == 'minimax':
                 for m in moves:
@@ -94,7 +136,7 @@ class Agent:
         return st.num_Hingers() > 0 #If a hinger cell is available, then the game can be won in one move
     
 def agent_tester():
-    grid = [[1,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]
+    grid = [[1,0,1,1],[1,1,1,0],[0,1,0,1],[1,1,1,1]]
     sa = State(grid)
     
     print(sa,f"\nNum of Hingers: {sa.num_Hingers()}")
@@ -106,7 +148,7 @@ def agent_tester():
     
     while True:
         if not minimax_agent.win(sa):
-            bm = minimax_agent.move(sa, mode='minimax') 
+            bm = minimax_agent.move(sa, mode='alphabeta') 
             sa = bm
             c +=1
         else:
