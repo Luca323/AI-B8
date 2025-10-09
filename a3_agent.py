@@ -91,11 +91,7 @@ class Agent:
     
     
     def win(self, st: State) -> bool:
-        if st.num_Hingers() > 0: #If a hinger cell is available, then the game can be won in one move
-            
-            return True
-        
-        return False
+        return st.num_Hingers() > 0 #If a hinger cell is available, then the game can be won in one move
     
 def agent_tester():
     grid = [[1,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]
