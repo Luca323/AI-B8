@@ -24,19 +24,21 @@ class Agent:
         active_cells = sum(sum(1 for val in row if val != 0) for row in st.grid)
         return active_cells
     
-    def is_terminal(self, st: State) -> bool:
-        return st.num_Hingers() > 0
+    def is_terminal(self, st: State, parent_reg=None) -> bool:
+        if parent_reg:
+            return st.numRegions() > parent_reg
+        return False
             
     
     def minimax(self, st: State, depth: int, maximising: bool, parent_reg=None) -> tuple:
         r = st.numRegions()
         
-        if depth == 0 or self.is_terminal(st):
+        if depth == 0 or self.is_terminal(st, parent_reg):
             if parent_reg:
                 score = self.evaluate(st, parent_reg)
             else:
                 score = self.evaluate(st, r)
-            return score
+            return score, st
         
         best_state = None
         
@@ -48,7 +50,7 @@ class Agent:
                 if eval_score > max_eval:
                     max_eval, best_state = eval_score, nxt_st
                     
-            return max_eval
+            return max_eval, best_state
         
         else:
             min_eval = inf
@@ -58,13 +60,14 @@ class Agent:
                 if eval_score < min_eval:
                     min_eval, best_state = eval_score, nxt_st
                     
-            return min_eval
+            return min_eval, best_state
             
             
     def move(self, st: State, mode=None) -> State:
         moves = []
         best_move = None
         best_score = -inf
+        
         for m in st.moves():
             moves.append(m) #Cache all available moves
             
@@ -78,7 +81,7 @@ class Agent:
             
             if mode == 'minimax':
                 for m in moves:
-                    score = self.minimax(m, depth=3, maximising=False)
+                    score,_ = self.minimax(m, depth=3, maximising=False)
                     if score > best_score:
                         best_score = score
                         best_move = m
@@ -98,11 +101,15 @@ def agent_tester():
     grid = [[0,1,1,1],[0,0,1,1],[1,1,1,0],[0,0,1,0]]
     sa = State(grid)
     
+    print(sa,f"\nNum of Hingers: {sa.num_Hingers()}")
+    
     
     
     minimax_agent = Agent("mm Tester", sa.dimensions)
     
-    print(minimax_agent.move(sa, mode='minimax'))
+    bm = minimax_agent.move(sa, mode='minimax') if not minimax_agent.win(sa) else "Winning State"
+    
+    print("Best Move: \n",bm)
 
 if __name__ == "__main__":
     agent_tester()
