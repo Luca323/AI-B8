@@ -15,9 +15,13 @@ def play(st: State, agentA: Agent, agentB: Agent)->None:
     while True:
         
         if agentA.win(st, isMove=player1):
+            st = agentA.move(st)
+            print(agentA.name,"'s move: \n", st)
             print(f"Game Over, player {agentA.name} Wins!")
             return
         elif agentB.win(st, isMove=player2):
+            st = agentB.move(st)
+            print(agentB.name,"'s move: \n", st)
             print(f"Game Over, player {agentB.name} Wins!")
             return
         

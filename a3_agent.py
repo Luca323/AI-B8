@@ -17,14 +17,35 @@ class Agent:
         return f"Agent {self.name}"
     
     def evaluate(self, st: State, parent_reg: int) -> int:
-        if st.numRegions() > parent_reg:
+        # Winning move
+        if st.numRegions() < parent_reg:
+            return inf
+    
+        active_cells = 0
+        potential_hingers = 0
+    
+        for i in range(st.dimensions[0]):
+            for j in range(st.dimensions[1]):
+                val = st.grid[i][j]
+                if val > 0:
+                    active_cells += 1
+                    if val == 1:  # A hinger cell
+                        potential_hingers += 1
+    
+        # Fewer active cells = better, more hingers = more opportunities
+        return -active_cells + (5 * potential_hingers)
+    
+    '''
+    def evaluate(self, st: State, parent_reg: int) -> int:
+        if st.numRegions() < parent_reg:
             return inf #Adds large bias for taking hinger cells
         
         active_cells = sum(sum(1 for val in row if val != 0) for row in st.grid)
         return -active_cells
+    '''
     
     def is_terminal(self, st: State, parent_reg=None) -> bool:
-        if parent_reg:
+        if parent_reg is not None:
             return st.numRegions() > parent_reg
         return False
             
@@ -150,7 +171,7 @@ def agent_tester():
     c = 1
     
     while True:
-        if not minimax_agent.win(sa):
+        if sa and not minimax_agent.win(sa):
             bm = minimax_agent.move(sa, mode='alphabeta') 
             sa = bm
             c +=1
