@@ -8,40 +8,34 @@ from a1_state import State
 from a3_agent import Agent
 
 def play(st: State, agentA: Agent, agentB: Agent)->None:
-    player1 = True
-    player2 = False
-    
+    player_turn = True  #True = agentA's turn, False = agentB's turn
     
     while True:
         
-        if agentA.win(st, isMove=player1):
-            st = agentA.move(st)
-            print(agentA.name,"'s move: \n", st)
-            print(f"Game Over, player {agentA.name} Wins!")
-            return
-        elif agentB.win(st, isMove=player2):
-            st = agentB.move(st)
-            print(agentB.name,"'s move: \n", st)
-            print(f"Game Over, player {agentB.name} Wins!")
+        current_agent = agentA if player_turn else agentB
+        
+        next_state = current_agent.move(st)
+        
+        #If no more moves are possible, it’s a draw
+        if not next_state:
+            print("Game Over! It's a draw.")
             return
         
-        if player1:
-            st = agentA.move(st)
-            print(agentA.name,"'s move: \n", st)
-            
-            player1 = False
-            player2 = True
-            
-        elif player2:
-            st = agentB.move(st)
-            print(agentB.name,"'s move: \n", st)
-            
-            player1 = True
-            player2 = False
+        
+        print(f"{current_agent.name}'s move: \n", next_state)
+        
+        if current_agent.win(next_state):
+            print(f"Game Over, player {current_agent.name} Wins!")
+            return
+        
+        
+        # Switch turns
+        st = next_state
+        player_turn = not player_turn
             
         
 def playtest():
-    grid = [[1,3,1,1],[1,4,2,1],[1,1,1,3],[4,1,1,1]]
+    grid = [[1,3,1,1],[1,0,2,1],[1,1,1,3],[4,1,1,1]]
     start_state = State(grid=grid)
     
     agentA = Agent("Jotaro Kujo", start_state.dimensions)

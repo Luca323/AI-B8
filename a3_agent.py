@@ -130,20 +130,23 @@ class Agent:
         best_score = -inf
         
         for m in st.moves():
-            moves.append(m) #Cache all available moves
-            
+            moves.append(m)
+        
         if len(moves) > 0:
+        
+            #Cache all available moves
+            parent_reg = st.numRegions()
             
             if mode == 'alphabeta':
                 for m in moves:
-                    score,_ = self.alphabeta(m, depth=3, alpha= -inf, beta=inf, maximising=False)
+                    score,_ = self.alphabeta(m, depth=3, alpha= -inf, beta=inf, maximising=False, parent_reg=parent_reg)
                     if score > best_score:
                         best_score = score
                         best_move = m
             
             if mode == 'minimax':
                 for m in moves:
-                    score,_ = self.minimax(m, depth=3, maximising=False)
+                    score,_ = self.minimax(m, depth=3, maximising=False, parent_reg=parent_reg)
                     if score > best_score:
                         best_score = score
                         best_move = m
@@ -152,12 +155,11 @@ class Agent:
     
     
     
-    def win(self, st: State, isMove=True) -> bool:
-        if st.num_Hingers() > 0 and isMove:
-            
-            return True #If a hinger cell is available, then the game can be won in one move
+    def win(self, st: State, parent_reg=None) -> bool:
+         if parent_reg is None:
+            return False
         
-        return False
+         return st.numRegions() > parent_reg
     
 def agent_tester():
     grid = [[1,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]
