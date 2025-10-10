@@ -193,7 +193,9 @@ def compare(start, end, bfs_fn, dfs_fn, iddfs_fn, astar_fn, max_depth=20):
             r["Algorithm"], str(r["Correct"]), r["Runtime (s)"], str(r["Path Length"])
         ))
 
-    
+    def min_safe(start, end):
+        
+        return None
 
 
 # --- Tester ---

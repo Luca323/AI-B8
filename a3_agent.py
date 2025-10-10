@@ -164,6 +164,7 @@ class Agent:
 def agent_tester():
     grid = [[1,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]
     sa = State(grid)
+    r = sa.numRegions()
     
     print(sa,f"\nNum of Hingers: {sa.num_Hingers()}")
     
@@ -173,7 +174,7 @@ def agent_tester():
     c = 1
     
     while True:
-        if sa and not minimax_agent.win(sa):
+        if sa and not minimax_agent.win(sa, r):
             bm = minimax_agent.move(sa, mode='alphabeta') 
             sa = bm
             c +=1
