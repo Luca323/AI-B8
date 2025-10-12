@@ -15,7 +15,7 @@ class State:
             return True
         
     def __str__(self) -> str:
-        return f"Dimensions: {self.dimensions}\n" + "\n\n".join("   ".join(str(x) for x in row) for row in self.grid)
+        return "\n\n".join("  ".join(str(x) for x in row) for row in self.grid)
     
     def clone(self) -> 'State': #To create a deep copy of state
         copy = [[self.grid[i][j] for j in range(self.dimensions[1])]
@@ -99,8 +99,10 @@ def tester() -> None:
     print(f'\nNumber of Regions: {sa.numRegions()} \nNumber of Hinger Cells: {sa.num_Hingers()}')
     
     print("\nAvailable moves:")
+    c = 1
     for m in sa.moves():
-        print(m, "\n\n")
+        print(f"Move {c}:\n" + str(m), "\n\n")
+        c+=1
         
         
 

@@ -46,7 +46,7 @@ def play(st: State, agentA: Agent, agentB: Agent)->None:
             else:
                 current_agent = agentA
                 next_state = current_agent.move(st)
-            print(f"{current_agent.name}'s move: \n", next_state)
+            print(f"{current_agent.name}'s move:\n" + str(next_state))
         else:
             current_agent = agentA if agent_turn == 'A' else agentB
             
@@ -58,7 +58,7 @@ def play(st: State, agentA: Agent, agentB: Agent)->None:
                 return
             
             
-            print(f"{current_agent.name}'s move: \n", next_state)
+            print(f"{current_agent.name}'s move:\n" + str(next_state))
             
         if current_agent.win(next_state, st.numRegions()):
             print(f"Game Over, player {current_agent.name} Wins!")
@@ -78,8 +78,8 @@ def playermove(st: State) -> tuple:
     start_time = time.time()
     print("Your turn")
     while player_moved == False:
-        row = int(input("Enter row:\n"))
-        column = int(input("Enter Column:\n"))
+        row = int(input("Enter Column:\n"))
+        column = int(input("Enter Row:\n"))
         if st.grid[row - 1][column - 1] < 1:
             return -1, -1
         
