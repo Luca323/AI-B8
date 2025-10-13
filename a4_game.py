@@ -17,7 +17,7 @@ class Player(Agent):
         return playermove(st)
 
 def play(st: State, agentA: Agent, agentB: Agent)->None:
-    player_input = input("Would you like to play a game of Hinger? Enter Y if yes, or anything else if no.\n")
+    player_input = input("Would you like to play a game of Hinger? Enter Y if yes, N if no.\n")
     player = Player(name="Player", size=st.dimensions)
     player_play = False
     agent_turn = 'A'
