@@ -100,6 +100,15 @@ def path_IDDFS(start, end, max_depth=20):
 
 
 # A* Algorithm
+# 
+#
+# The heurisitc within A* estimates how far the current state is from the goal
+# It does so by counting how many cells are different between them
+#
+#
+# It essentially guesses how many changes are needed to reach the goal
+# This helps the algorithm focus on states that are closer to the goal instead of exploring randomly
+# This makes the search faster and more efficient without sacrificing efficiency
 def path_astar(start, end):
     
     s_regions = start.numRegions()  # number of regions in the start state
