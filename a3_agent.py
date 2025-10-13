@@ -124,7 +124,7 @@ class Agent:
              return min_eval, best_state
             
             
-    def move(self, st: State, mode='alphabeta') -> State:
+    def move(self, st: State, mode='alphabeta') -> State: #Alpha-Beta used as primary strategy as it has better performance
         moves = []
         best_move = None
         best_score = -inf

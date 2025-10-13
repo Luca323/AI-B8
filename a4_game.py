@@ -7,7 +7,6 @@ Coursework 001
 from a1_state import State
 from a3_agent import Agent
 import time
-import sys
 
 class Player(Agent):
     def __init__(self, name="Player", size: tuple = (0, 0)):
@@ -16,7 +15,7 @@ class Player(Agent):
     def move(self, st: State) -> State:
         return playermove(st)
 
-def play(st: State, agentA: Agent, agentB: Agent)->None:
+def play(st: State, agentA: Agent, agentB: Agent) -> None:
     player_input = input("Would you like to play a game of Hinger? Enter Y if yes, N if no.\n")
     player = Player(name="Player", size=st.dimensions)
     player_play = False
@@ -77,13 +76,14 @@ def playermove(st: State) -> tuple:
     player_moved = False
     start_time = time.time()
     print("Your turn")
+    
     while player_moved == False:
-        row = int(input("Enter Column:\n"))
         column = int(input("Enter Row:\n"))
+        row = int(input("Enter Column:\n"))
         if st.grid[row - 1][column - 1] < 1:
             return -1, -1
         
-        print(f"Your move is ({row}), ({column})")
+        print(f"Your move is ({row},{column})")
         player_moved = True
     return column - 1, row - 1
 

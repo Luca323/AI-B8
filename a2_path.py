@@ -207,20 +207,19 @@ def compare(start, end, bfs_fn, dfs_fn, iddfs_fn, astar_fn, max_depth=20):
         return None
     
 
+'''
+We used Dijkstra's algorithm for min safe
 
-# We used Dijkstra's algorithm for min safe
-#
-#
-# The reason we use Dijkstra's algorithm is because we need to find a SAFE path with LOWEST total cost
-# Unlike other algorithms (BFS and DFS etc.) that minimise the steps, Dijkstra's minimises the total move cost
-#
-# 
-# Essentially, Dijkstra's will return the cheapest overall path
-#
-#
-# Since each move in hinger can have a different cost (for example, reducing a higher number may cost more);
-# Dijkstra's is the most efficient and reliable choice
-# It expands paths in order of their total cost, guaranteeing the minimal- cost safe path if one exists 
+The reason we use Dijkstra's algorithm is because we need to find a SAFE path with LOWEST total cost
+Unlike other algorithms (BFS and DFS etc.) that minimise the steps, Dijkstra's minimises the total move cost
+ 
+Essentially, Dijkstra's will return the cheapest overall path
+
+Since each move in hinger can have a different cost (for example, reducing a higher number may cost more);
+Dijkstra's is the most efficient and reliable choice
+It expands paths in order of their total cost, guaranteeing the minimal- cost safe path if one exists
+ 
+'''
 def min_safe(start, end):
     s_regions = start.numRegions()
     
