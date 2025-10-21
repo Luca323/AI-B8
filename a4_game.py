@@ -7,6 +7,7 @@ Coursework 001
 from a1_state import State
 from a3_agent import Agent
 import time
+import random
 
 class Player(Agent):
     def __init__(self, name="Player", size: tuple = (0, 0)):
@@ -27,7 +28,11 @@ def play(st: State, agentA: Agent, agentB: Agent) -> None:
         player_play = False
     else:
         print("You are now playing the game.")
-        player_play = True
+        time.sleep(0.5)
+        player_name = input("Input your name \n")
+        if player_name:
+            player.name = player_name
+            player_play = True
     
     
     while True:
@@ -60,7 +65,7 @@ def play(st: State, agentA: Agent, agentB: Agent) -> None:
             print(f"{current_agent.name}'s move:\n" + str(next_state))
             
         if current_agent.win(next_state, st.numRegions()):
-            print(f"Game Over, player {current_agent.name} Wins!")
+            print(f"Game Over, {current_agent.name} Wins!")
             return
         
         
@@ -80,17 +85,24 @@ def playermove(st: State) -> tuple:
     while player_moved == False:
         column = int(input("Enter Row:\n"))
         row = int(input("Enter Column:\n"))
-        if st.grid[row - 1][column - 1] < 1:
+        if st.grid[column - 1][row - 1] < 1:
             return -1, -1
-        
         print(f"Your move is ({row},{column})")
         player_moved = True
     return column - 1, row - 1
 
-
+def randomisegrid(height: int, width: int):
+    grid = []
+    for x in range(height):
+        gridvals = []
+        for x in range(width):
+            gridval = random.randint(1, 3)
+            gridvals.append(gridval)
+        grid.append(gridvals)
+    return grid
 
 def playtest():
-    grid = [[1,3,1,1],[1,0,2,1],[1,1,1,3],[4,1,1,1]]
+    grid = randomisegrid(4,4)
     start_state = State(grid=grid)
     
     agentA = Agent("Jotaro Kujo", start_state.dimensions)
