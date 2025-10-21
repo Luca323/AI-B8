@@ -8,7 +8,7 @@ Coursework 001
 class State:
     def __init__(self, grid):
         self.grid = grid
-        self.dimensions = (len(grid),len(grid[0])) #Records dimension of grid
+        self.dimensions = (len(grid),len(grid[0])) 
         
     def __eq__(self, o):
         if self.grid == o.grid:
@@ -17,7 +17,7 @@ class State:
     def __str__(self) -> str:
         return "\n\n".join("  ".join(str(x) for x in row) for row in self.grid)
     
-    def clone(self) -> 'State': #To create a deep copy of state
+    def clone(self) -> 'State': 
         copy = [[self.grid[i][j] for j in range(self.dimensions[1])]
                  for i in range(self.dimensions[0])]
         return State(copy)
@@ -34,7 +34,7 @@ class State:
         
         return None
     
-    def moves(self) -> 'State': #Yields all available moves 
+    def moves(self) -> 'State':
         for i in range (self.dimensions[0]): 
             for j in range(self.dimensions[1]): 
                 next_st = self.move([i, j])
@@ -42,26 +42,25 @@ class State:
                     yield next_st
                     
                     
-    def numRegions(self) -> int: #detects clusters
+    def numRegions(self) -> int: 
         coords = [(i, j)
               for i in range(self.dimensions[0])
               for j in range(self.dimensions[1])
-              if self.grid[i][j] != 0] #Collect coords of all points
-
+              if self.grid[i][j] != 0] 
         if not coords:
-            return 0 #Throw 0 if no regions exist
+            return 0
     
         coords = set(coords)
-        unvisited = set(coords) #Open coordinates
+        unvisited = set(coords) 
         regions = 0
     
-        #all possible neighbor directions
+        
         neighbors = [
             (-1, -1), (-1, 0), (-1, 1),
             (0, -1),(0, 1), (1, -1),  (1, 0), (1, 1)
             ]
     
-        while unvisited: #Goes through all points
+        while unvisited: 
             regions += 1
 
             to_check = [unvisited.pop()]
@@ -83,7 +82,7 @@ class State:
         for s in self.moves():
             if s.numRegions() > self.numRegions():
                 h += 1
-        return h #Defines a hinger as any move that increases the number of regions
+        return h 
     
         
 def tester() -> None:
