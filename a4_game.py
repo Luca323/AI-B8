@@ -40,7 +40,11 @@ def play(st: State, agentA: Agent, agentB: Agent) -> None:
             if player_turn:
                 current_agent = player
                 player_move = playermove(st)
-                if player_move == (-1, -1):
+                if player_move == (-2, -2):
+                    print("Out of bounds, illegal move. You lose.")
+                    print(f"{agentA.name} wins the game.")
+                    return
+                elif player_move == (-1, -1):
                     print("Illegal move. Cannot remove from a 0. You lose.")
                     print(f"{agentA.name} wins the game.")
                     return
@@ -50,13 +54,13 @@ def play(st: State, agentA: Agent, agentB: Agent) -> None:
             else:
                 current_agent = agentA
                 next_state = current_agent.move(st)
+            time.sleep(1)
             print(f"{current_agent.name}'s move:\n" + str(next_state))
         else:
             current_agent = agentA if agent_turn == 'A' else agentB
             
             next_state = current_agent.move(st)
             
-            #If no more moves are possible, it’s a draw
             if not next_state:
                 print("Game Over! It's a draw.")
                 return
@@ -69,7 +73,7 @@ def play(st: State, agentA: Agent, agentB: Agent) -> None:
             return
         
         
-        # Switch turns
+        # Switch turns between player and agent or between two agents
         st = next_state
         if player_play:
             player_turn = not player_turn
@@ -79,15 +83,17 @@ def play(st: State, agentA: Agent, agentB: Agent) -> None:
         
 def playermove(st: State) -> tuple:
     player_moved = False
-    start_time = time.time()
     print("Your turn")
-    
+    bounds = st.dimensions
     while player_moved == False:
+        
         column = int(input("Enter Row:\n"))
         row = int(input("Enter Column:\n"))
-        if st.grid[column - 1][row - 1] < 1:
+        if (row, column) > bounds or (column, row) > bounds:
+            return -2, -2
+        elif st.grid[column - 1][row - 1] < 1:
             return -1, -1
-        print(f"Your move is ({row},{column})")
+        print(f"Your move is ({column},{row})")
         player_moved = True
     return column - 1, row - 1
 
