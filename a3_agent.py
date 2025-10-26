@@ -118,92 +118,72 @@ class Agent:
                  
              return min_eval, best_state
          
-    # ------------------------
-    # MONTE CARLO TREE SEARCH 
-    # ------------------------
-    def mcts(self, st: State, time_limit=2.0) -> State:
+    def mcts(self, start_state: State, time_limit=2.0) -> State:
         """
-        Monte Carlo Tree Search (MCTS)
-        This algorithm simulates many possible future moves within a time limit
-        and uses the evaluation function as a quick way to measure how good each path is.
+        Monte Carlo Tree Search (MCTS) using only State objects (no Node class).
+        
+        This version explores possible moves from the current state
+        by performing many random playouts (simulations) within a time limit.
+        It uses the Agent's `evaluate()` function to score how 'good' each path is.
+        
+        At the end, the move that produced the highest average reward
+        across all simulations is selected.
         """
 
-        class Node:
-            def __init__(self, state, parent=None):
-                self.state = state
-                self.parent = parent
-                self.children = []
-                self.visits = 0
-                self.value = 0.0
-
-        def select(node):
-            """Select best child using UCB1 (explore/exploit balance)."""
-            best, best_score = None, -inf
-            for child in node.children:
-                exploit = child.value / (child.visits + 1e-6)
-                explore = sqrt(log(node.visits + 1) / (child.visits + 1e-6))
-                score = exploit + 1.4 * explore
-                if score > best_score:
-                    best_score = score
-                    best = child
-            return best
-
-        def expand(node, s_regions):
-            """Add one new child (unexplored move)."""
-            for nxt in node.state.moves():
-                if nxt.numRegions() > s_regions:
-                    continue
-                if all(child.state != nxt for child in node.children):
-                    new_child = Node(nxt, node)
-                    node.children.append(new_child)
-                    return new_child
-            return None
-
-        def simulate(state, parent_reg):
-            """Quick evaluation instead of random rollout."""
-            return self.evaluate(state, parent_reg)
-
-        def backpropagate(node, reward):
-            while node:
-                node.visits += 1
-                node.value += reward
-                node = node.parent
-
-        def best_child(node):
-            if not node.children:
-                return None
-            return max(node.children, key=lambda c: c.visits)
-
-        # --- Main MCTS Loop ---
-        root = Node(st)
-        s_regions = st.numRegions()
         start_time = time.time()
-        iterations = 0
+        s_regions = start_state.numRegions()
 
+        moves = start_state.moves()
+        if not moves:
+            return None  # no moves available
+
+        # Statistics for each move
+        total_scores = {id(m): 0 for m in moves}
+        visit_counts = {id(m): 0 for m in moves}
+
+        # Run simulations until the time limit expires
         while time.time() - start_time < time_limit:
-            node = root
+            # Pick a random move to explore
+            move = random.choice(moves)
 
-            # 1. Selection
-            while node.children:
-                node = select(node)
+            # Simulate a random playout from this move
+            current = move
+            depth = 0
+            max_depth = 10  # limit rollout length to avoid infinite loops
 
-            # 2. Expansion
-            child = expand(node, s_regions)
-            if child:
-                node = child
+            while depth < max_depth:
+                next_moves = current.moves()
+                if not next_moves:
+                    break
 
-            # 3. Simulation (evaluate state quality)
-            reward = simulate(node.state, s_regions)
+                # Skip unsafe states (those that increase number of regions)
+                safe_moves = [m for m in next_moves if m.numRegions() <= s_regions]
+                if not safe_moves:
+                    break
 
-            # 4. Backpropagation
-            backpropagate(node, reward)
-            iterations += 1
+                current = random.choice(safe_moves)
+                depth += 1
 
-        print(f"[MCTS] {iterations} simulations completed.")
-        best = best_child(root)
-        return best.state if best else None
-            
-            
+            # Use evaluate() to score the resulting state
+            reward = self.evaluate(current, s_regions)
+
+            # Update statistics
+            total_scores[id(move)] += reward
+            visit_counts[id(move)] += 1
+
+        # Choose move with highest average score
+        best_move, best_avg = None, -inf
+        for m in moves:
+            if visit_counts[id(m)] > 0:
+                avg_score = total_scores[id(m)] / visit_counts[id(m)]
+                if avg_score > best_avg:
+                    best_avg = avg_score
+                    best_move = m
+
+        print(f"[MCTS] Simulated {sum(visit_counts.values())} playouts.")
+        return best_move
+                
+                
     def move(self, st: State, mode='alphabeta') -> State: #Alpha-Beta used as primary strategy as it has better performance
         moves = []
         best_move = None
@@ -232,14 +212,14 @@ class Agent:
                         best_move = m
             
         return best_move
-    
-    
-    
+
+
+
     def win(self, st: State, parent_reg=None) -> bool:
-         if parent_reg is None:
+        if parent_reg is None:
             return False
         
-         return st.numRegions() > parent_reg
+        return st.numRegions() > parent_reg
     
 # --- Tester ---
 def agent_tester():
