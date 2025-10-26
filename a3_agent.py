@@ -18,7 +18,7 @@ class Agent:
     
     def evaluate(self, st: State, parent_reg: int) -> int:
         #winning move
-        if st.numRegions() < parent_reg:
+        if st.numRegions() != parent_reg:
             return inf
     
         active_cells = 0

@@ -9,7 +9,7 @@ from a3_agent import Agent
 import time
 import random
 
-class Player(Agent):
+class Player(Agent): #Creates class for Player to utilise win-condition function
     def __init__(self, name="Player", size: tuple = (0, 0)):
         super().__init__(name, size)
 
@@ -19,8 +19,9 @@ class Player(Agent):
 def play(st: State, agentA: Agent, agentB: Agent) -> None:
     player_input = input("Would you like to play a game of Hinger? Enter Y if yes, N if no.\n")
     player = Player(name="Player", size=st.dimensions)
+    
     player_play = False
-    agent_turn = 'A'
+    agent_turn = 'A' #Determines whose turn it is
     player_turn = False
     
     if player_input.lower() != 'y':
@@ -89,7 +90,7 @@ def playermove(st: State) -> tuple:
         
         column = int(input("Enter Row:\n"))
         row = int(input("Enter Column:\n"))
-        if (row, column) > bounds or (column, row) > bounds:
+        if (row, column) > bounds or (column, row) > bounds: #Checks comments are within the board
             return -2, -2
         elif st.grid[column - 1][row - 1] < 1:
             return -1, -1
@@ -97,7 +98,7 @@ def playermove(st: State) -> tuple:
         player_moved = True
     return column - 1, row - 1
 
-def randomisegrid(height: int, width: int):
+def randomisegrid(height: int, width: int): #Creates random non-binary grid
     grid = []
     for x in range(height):
         gridvals = []
@@ -116,5 +117,5 @@ def playtest():
     
     play(start_state, agentA, agentB)
     
-if __name__ == "__main__":
+if __name__ == "__main__": 
     playtest()

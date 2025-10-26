@@ -102,7 +102,9 @@ def tester() -> None:
     print("\nAvailable moves:")
     c = 1
     for m in sa.moves():
-        print(f"Move {c}:\n" + str(m), "\n\n")
+        print(f"Move {c}:\n" + str(m))
+        print(f'Number of Regions: {m.numRegions()} \nNumber of Hinger Cells: {m.num_Hingers()}\n')
+
         c+=1
         
         
