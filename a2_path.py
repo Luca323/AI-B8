@@ -18,20 +18,20 @@ def path_DFS(start, end):
     s_regions = start.numRegions()
 
     def dfs(current, path):
-    
+        # Stop if the current state matches the goal
         if current == end:
             return path
 
         visited.append(current)
 
-       
+        # Expand next moves
         for next_state in current.moves():
-           
+            # Check if we've already seen this exact grid
             if next_state.numRegions() > s_regions:
                 continue
             already_visited = any(next_state == v for v in visited)
             if not already_visited:
-            
+                # For now, treat all states as safe (no hinger logic yet)
                 result = dfs(next_state, path + [next_state])
                 if result is not None:
                     return result
@@ -40,7 +40,6 @@ def path_DFS(start, end):
     return dfs(start, [])
 
 
-# Breadth First Search
 def path_BFS(start: State, end: State):
     queue = deque([(start, [start])])
     closed = [start]
@@ -55,7 +54,7 @@ def path_BFS(start: State, end: State):
         
         for nxt_st in current.moves():
             if nxt_st.numRegions() > start_regions:
-                continue 
+                continue #Ignores any unsafe moves i.e taking hinger cells
             
             if all(nxt_st != v for v in closed):
                 closed.append(nxt_st)
@@ -78,20 +77,21 @@ def path_IDDFS(start, end, max_depth=20):
 
         for next_state in current.moves():
             if next_state.numRegions() > s_regions: 
-                continue 
+                continue #Disallows unsafe moves
+            # avoid cycles by not revisiting states already in current path
             if not any(next_state == p for p in path):
-                
+                # safe-state check could go here once numHinges() is ready
                 result = dfs_limited(next_state, end, path + [next_state], depth - 1)
                 if result is not None:
                     return result
         return None
 
-    
+    # Iteratively increase the allowed search depth
     for limit in range(1, max_depth + 1):
-        
+        #print(f"Searching with depth limit {limit}...")
         result = dfs_limited(start, end, [start], limit)
         if result is not None:
-           
+            #print(f"Solution found at depth {limit}.")
             return result
 
     print("No path found within the maximum depth limit.")
@@ -99,31 +99,31 @@ def path_IDDFS(start, end, max_depth=20):
 
 
 
-'''A* Algorithm
- 
-
-The heurisitc within A* estimates how far the current state is from the goal
-It does so by counting how many cells are different between them
-
-
-It essentially guesses how many changes are needed to reach the goal
-This helps the algorithm focus on states that are closer to the goal instead of exploring randomly
-This makes the search faster and more efficient without sacrificing efficiency '''
-
+# A* Algorithm
+# 
+#
+# The heurisitc within A* estimates how far the current state is from the goal
+# It does so by counting how many cells are different between them
+#
+#
+# It essentially guesses how many changes are needed to reach the goal
+# This helps the algorithm focus on states that are closer to the goal instead of exploring randomly
+# This makes the search faster and more efficient without sacrificing efficiency
 def path_astar(start, end):
     
-    s_regions = start.numRegions()  
+    s_regions = start.numRegions()  # number of regions in the start state
 
-    
+    # Priority queue of tuples: (f, counter, g, state, path)
     prioqueue = []
-    counter = itertools.count()  
+    counter = itertools.count()  # unique sequence count for tie-breaking
     heapq.heappush(prioqueue, (0, next(counter), 0, start, [start]))
 
-    
+    # List of visited states
     visited = [start]
 
-    
+    # Heuristic: count how many cells differ between two grids
     def heuristic(a, b):
+        # Compare all corresponding cells in both grids
         return sum(
             cell_a != cell_b
             for row_a, row_b in zip(a.grid, b.grid)
@@ -131,31 +131,40 @@ def path_astar(start, end):
         )
 
     while prioqueue:
+        # Take the state with the lowest total estimated cost (f = g + h)
         f_score, _, g_score, current, path = heapq.heappop(prioqueue)
 
+        # If we've reached the goal, return the path
         if current == end:
             return path
 
+        # Explore all possible moves from the current state
         for next_state in current.moves():
+            # Skip unsafe states (those that increase the number of regions)
             if next_state.numRegions() > s_regions:
                 continue
 
+            # Skip already visited states
             if any(next_state == v for v in visited):
                 continue
 
+            # Each move costs 1 more step
             new_g = g_score + 1
 
+            # Estimate how far we are from the goal
             h = heuristic(next_state, end)
 
+            # Total estimated cost (f = g + h)
             f = new_g + h
 
+            # Mark this state as visited
             visited.append(next_state)
 
+            # Push into the priority queue (with tie-breaker counter)
             heapq.heappush(prioqueue, (f, next(counter), new_g, next_state, path + [next_state]))
 
+    # If no path found, return None
     return None
-
-
 
 def compare(start, end, bfs_fn, dfs_fn, iddfs_fn, astar_fn, max_depth=20):
     
@@ -185,6 +194,7 @@ def compare(start, end, bfs_fn, dfs_fn, iddfs_fn, astar_fn, max_depth=20):
             "Path Length": path_length
         })
     
+    # Print results in a readable table
     print("{:<10} {:<10} {:<12} {:<12}".format("Algorithm", "Correct", "Runtime (s)", "Path Length"))
     print("-" * 46)
     for r in results:
@@ -212,37 +222,46 @@ It expands paths in order of their total cost, guaranteeing the minimal- cost sa
 '''
 def min_safe(start, end):
     s_regions = start.numRegions()
-
+    
+    # Priority queue stores (total_cost, counter, state, path)
     prioqueue = []
     counter = itertools.count()
     heapq.heappush(prioqueue, (0, next(counter), start, [start]))
 
-    visited = [] 
+    # Track visited states and the best cost found so far
+    visited = []  # store (state, cost)
 
     while prioqueue:
         total_cost, _, current, path = heapq.heappop(prioqueue)
 
+        # If we've reached the goal, return the path
         if current == end:
             return path
 
+        # Check if we've already visited this state with a lower cost
         if any(current == v[0] and total_cost >= v[1] for v in visited):
             continue
         visited.append((current, total_cost))
 
+        # Explore all possible next states
         for next_state in current.moves():
+            # Skip unsafe moves (those that increase the number of regions)
             if next_state.numRegions() > s_regions:
                 continue
 
-            
-            move_cost = 1 
+            # Move cost could depend on what you decrease; here we assume cost = value reduced
+            # Example: if cell (i, j) had a value of X, reducing it costs X
+            move_cost = 1  # can adjust this to depend on the actual move
             new_cost = total_cost + move_cost
 
+            # Only push if we haven’t found a cheaper way to reach this state
             if not any(next_state == v[0] and new_cost >= v[1] for v in visited):
                 heapq.heappush(prioqueue, (new_cost, next(counter), next_state, path + [next_state]))
 
+    # If no path found, return None
     return None
 
-# Tester
+# --- Tester ---
 def tester():
     print("Running path tester...\n")
     start_grid = [
