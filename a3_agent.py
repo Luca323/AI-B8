@@ -17,7 +17,7 @@ class Agent:
         return f"Agent {self.name}"
     
     def evaluate(self, st: State, parent_reg: int) -> int:
-        # Winning move
+        #winning move
         if st.numRegions() < parent_reg:
             return inf
     
@@ -29,20 +29,13 @@ class Agent:
                 val = st.grid[i][j]
                 if val > 0:
                     active_cells += 1
-                    if val == 1:  # A hinger cell
+                    if val == 1:  # hinger cell identification
                         potential_hingers += 1
     
-        # Fewer active cells = better, more hingers = more opportunities
-        return -active_cells + (5 * potential_hingers)
+        #fewer active cells = better, more hingers = more opportunities
+        return -active_cells + (5 * potential_hingers) 
+   
     
-    '''
-    def evaluate(self, st: State, parent_reg: int) -> int:
-        if st.numRegions() < parent_reg:
-            return inf #Adds large bias for taking hinger cells
-        
-        active_cells = sum(sum(1 for val in row if val != 0) for row in st.grid)
-        return -active_cells
-    '''
     
     def is_terminal(self, st: State, parent_reg=None) -> bool:
         if parent_reg is not None:

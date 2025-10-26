@@ -8,7 +8,7 @@ Coursework 001
 class State:
     def __init__(self, grid):
         self.grid = grid
-        self.dimensions = (len(grid),len(grid[0])) #Records dimension of grid
+        self.dimensions = (len(grid),len(grid[0]))
         
     def __eq__(self, o):
         if self.grid == o.grid:
@@ -24,17 +24,18 @@ class State:
     
     def move(self, pos: list) -> 'State':
         assert(len(pos)==2)
+        
         i,j = pos[0],pos[1]
         st = self.clone()
         
         if st.grid[i][j] != 0:
             st.grid[i][j]-=1  
             
-            return st
+            return st #Returns a cloned state with first available cell removed
         
         return None
     
-    def moves(self) -> 'State': #Yields all available moves 
+    def moves(self) -> 'State': #Yields all available moves
         for i in range (self.dimensions[0]): 
             for j in range(self.dimensions[1]): 
                 next_st = self.move([i, j])
@@ -49,7 +50,7 @@ class State:
               if self.grid[i][j] != 0] #Collect coords of all points
 
         if not coords:
-            return 0 #Throw 0 if no regions exist
+            return 0
     
         coords = set(coords)
         unvisited = set(coords) #Open coordinates
@@ -61,19 +62,19 @@ class State:
             (0, -1),(0, 1), (1, -1),  (1, 0), (1, 1)
             ]
     
-        while unvisited: #Goes through all points
+        while unvisited: #Goes through all points in the stack of coords
             regions += 1
 
-            to_check = [unvisited.pop()]
+            to_check = [unvisited.pop()] #Takes starting point
     
             i = 0
-            while i < len(to_check):
-                r, c = to_check[i]
+            while i < len(to_check): #connected region counting algorithm
+                r, c = to_check[i] #Selects coordiantes of first cell
                 for dr, dc in neighbors:
-                    n = (r + dr, c + dc)
+                    n = (r + dr, c + dc)  #Checks all neighbour directions
                     if n in unvisited:
                         unvisited.remove(n)
-                        to_check.append(n)
+                        to_check.append(n) 
                 i += 1
     
         return regions
