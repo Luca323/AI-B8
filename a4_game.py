@@ -23,6 +23,7 @@ def play(st: State, agentA: Agent, agentB: Agent) -> None:
     player_play = False
     agent_turn = 'A' #Determines whose turn it is
     player_turn = False
+    moveNum = 0
     
     if player_input.lower() != 'y':
         print("You have chosen not to play.")
@@ -44,10 +45,12 @@ def play(st: State, agentA: Agent, agentB: Agent) -> None:
                 if player_move == (-2, -2):
                     print("Out of bounds, illegal move. You lose.")
                     print(f"{agentA.name} wins the game.")
+                    print(f"Turns taken: {moveNum - 1}")
                     return
                 elif player_move == (-1, -1):
                     print("Illegal move. Cannot remove from a 0. You lose.")
                     print(f"{agentA.name} wins the game.")
+                    print(f"Turns taken: {moveNum - 1}")
                     return
                 else:
                     row, column = player_move
@@ -56,21 +59,26 @@ def play(st: State, agentA: Agent, agentB: Agent) -> None:
                 current_agent = agentA
                 next_state = current_agent.move(st)
             time.sleep(1)
-            print(f"{current_agent.name}'s move:\n" + str(next_state))
+            moveNum += 1
+            print(f"Move: {moveNum}")
+            print(f"{current_agent.name}'s turn:\n" + str(next_state))
         else:
             current_agent = agentA if agent_turn == 'A' else agentB
             
             next_state = current_agent.move(st)
+            moveNum += 1
             
             if not next_state:
                 print("Game Over! It's a draw.")
+                print(f"Turns taken: {moveNum - 1}")
                 return
             
-            
+            print(f"Move: {moveNum}")
             print(f"{current_agent.name}'s move:\n" + str(next_state))
-            
+            time.sleep(0.5)
         if current_agent.win(next_state, st.numRegions()):
             print(f"Game Over, {current_agent.name} Wins!")
+            print(f"Turns taken: {moveNum}")
             return
         
         
