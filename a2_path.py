@@ -40,7 +40,7 @@ def path_DFS(start, end):
     return dfs(start, [])
 
 
-def path_BFS(start: State, end: State):
+def path_BFS(start: State, end: State): 
     queue = deque([(start, [start])])
     closed = [start]
     start_regions = start.numRegions()
