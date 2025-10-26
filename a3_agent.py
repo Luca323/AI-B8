@@ -5,7 +5,9 @@ Coursework 001
 @Authors: B8 (100415489, 100426892, 100437079)
 """
 from a1_state import State
-from math import inf
+from math import inf, sqrt, log
+import random
+import time
 
 class Agent:
     def __init__(self, name: str,  size: tuple):
@@ -115,6 +117,91 @@ class Agent:
                      break
                  
              return min_eval, best_state
+         
+    # ------------------------
+    # MONTE CARLO TREE SEARCH 
+    # ------------------------
+    def mcts(self, st: State, time_limit=2.0) -> State:
+        """
+        Monte Carlo Tree Search (MCTS)
+        This algorithm simulates many possible future moves within a time limit
+        and uses the evaluation function as a quick way to measure how good each path is.
+        """
+
+        class Node:
+            def __init__(self, state, parent=None):
+                self.state = state
+                self.parent = parent
+                self.children = []
+                self.visits = 0
+                self.value = 0.0
+
+        def select(node):
+            """Select best child using UCB1 (explore/exploit balance)."""
+            best, best_score = None, -inf
+            for child in node.children:
+                exploit = child.value / (child.visits + 1e-6)
+                explore = sqrt(log(node.visits + 1) / (child.visits + 1e-6))
+                score = exploit + 1.4 * explore
+                if score > best_score:
+                    best_score = score
+                    best = child
+            return best
+
+        def expand(node, s_regions):
+            """Add one new child (unexplored move)."""
+            for nxt in node.state.moves():
+                if nxt.numRegions() > s_regions:
+                    continue
+                if all(child.state != nxt for child in node.children):
+                    new_child = Node(nxt, node)
+                    node.children.append(new_child)
+                    return new_child
+            return None
+
+        def simulate(state, parent_reg):
+            """Quick evaluation instead of random rollout."""
+            return self.evaluate(state, parent_reg)
+
+        def backpropagate(node, reward):
+            while node:
+                node.visits += 1
+                node.value += reward
+                node = node.parent
+
+        def best_child(node):
+            if not node.children:
+                return None
+            return max(node.children, key=lambda c: c.visits)
+
+        # --- Main MCTS Loop ---
+        root = Node(st)
+        s_regions = st.numRegions()
+        start_time = time.time()
+        iterations = 0
+
+        while time.time() - start_time < time_limit:
+            node = root
+
+            # 1. Selection
+            while node.children:
+                node = select(node)
+
+            # 2. Expansion
+            child = expand(node, s_regions)
+            if child:
+                node = child
+
+            # 3. Simulation (evaluate state quality)
+            reward = simulate(node.state, s_regions)
+
+            # 4. Backpropagation
+            backpropagate(node, reward)
+            iterations += 1
+
+        print(f"[MCTS] {iterations} simulations completed.")
+        best = best_child(root)
+        return best.state if best else None
             
             
     def move(self, st: State, mode='alphabeta') -> State: #Alpha-Beta used as primary strategy as it has better performance
@@ -154,33 +241,35 @@ class Agent:
         
          return st.numRegions() > parent_reg
     
+# --- Tester ---
 def agent_tester():
-    grid = [[1,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]
+    grid = [[1, 1, 1, 1],
+            [1, 1, 1, 1],
+            [1, 1, 1, 1],
+            [1, 1, 1, 1]]
     sa = State(grid)
     r = sa.numRegions()
-    
-    print(sa,f"\nNum of Hingers: {sa.num_Hingers()}")
-    
-    
-    minimax_agent = Agent("Bobby Jean", sa.dimensions)
-    bm = minimax_agent.move(sa, mode='alphabeta')
+
+    print(sa, f"\nNum of Hingers: {sa.num_Hingers()}")
+
+    agent = Agent("Monte Carlo Bobby", sa.dimensions)
+    bm = agent.move(sa, mode='mcts')
     c = 1
-    
+
     while True:
-        if sa and not minimax_agent.win(sa, r):
-            bm = minimax_agent.move(sa, mode='alphabeta') 
+        if sa and not agent.win(sa, r):
+            bm = agent.move(sa, mode='mcts')
             sa = bm
-            c +=1
+            c += 1
         else:
-            bm = "Winning State"
-            print(bm, f"in {c} moves")
+            print("Winning State", f"in {c} moves")
             break
-    
-        print("\nBest Move:\n",bm)
+
+        print(f"\nBest Move ({c}):\n", bm)
+
 
 if __name__ == "__main__":
     agent_tester()
-    
     
     
     
