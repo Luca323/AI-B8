@@ -45,12 +45,12 @@ def play(st: State, agentA: Agent, agentB: Agent) -> None:
                 if player_move == (-2, -2):
                     print("Out of bounds, illegal move. You lose.")
                     print(f"{agentA.name} wins the game.")
-                    print(f"Turns taken: {moveNum - 1}")
+                    print(f"Turns taken: {moveNum}")
                     return
                 elif player_move == (-1, -1):
                     print("Illegal move. Cannot remove from a 0. You lose.")
                     print(f"{agentA.name} wins the game.")
-                    print(f"Turns taken: {moveNum - 1}")
+                    print(f"Turns taken: {moveNum}")
                     return
                 else:
                     row, column = player_move
