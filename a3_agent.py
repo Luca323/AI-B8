@@ -180,7 +180,7 @@ class Agent:
                     best_avg = avg_score
                     best_move = m
 
-        print(f"[MCTS] Simulated {sum(visit_counts.values())} playouts.")
+        #print(f"[MCTS] Simulated {sum(visit_counts.values())} playouts.")
         return best_move
                 
                 
