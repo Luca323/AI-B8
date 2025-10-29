@@ -19,23 +19,23 @@ class Agent:
         return f"Agent {self.name}"
     
     def evaluate(self, st: State, parent_reg: int) -> int:
-        #winning move
+        # Reward any move that increases regions (a "winning" hinger move)
         if st.numRegions() != parent_reg:
             return inf
-    
-        active_cells = 0
-        potential_hingers = 0
-    
-        for i in range(st.dimensions[0]):
-            for j in range(st.dimensions[1]):
-                val = st.grid[i][j]
-                if val > 0:
-                    active_cells += 1
-                    if val == 1:  # hinger cell identification
-                        potential_hingers += 1
-    
-        #fewer active cells = better, more hingers = more opportunities
-        return -active_cells + (5 * potential_hingers) 
+
+        # Count all active (non-zero) cells
+        active_cells = sum(
+            1 for i in range(st.dimensions[0]) 
+            for j in range(st.dimensions[1]) 
+            if st.grid[i][j] > 0
+        )
+
+        # Use the true number of hingers from the State class
+        potential_hingers = st.num_Hingers()
+
+        # Fewer active cells = better; more hingers = much better
+        return -active_cells + (10 * potential_hingers)
+
    
     
     
@@ -117,60 +117,58 @@ class Agent:
             return min_eval, best_state
          
     def mcts(self, start_state: State, time_limit=2.0) -> State:
-
+        """Improved Monte Carlo Tree Search rollout version."""
         start_time = time.time()
         s_regions = start_state.numRegions()
-        moves = []
-
-        for m in start_state.moves():
-            moves.append(m)
+        moves = list(start_state.moves())
         
         if not moves:
-            return None  
+            return None
 
-        total_scores = {id(m): 0 for m in moves}
-        visit_counts = {id(m): 0 for m in moves}
+        # Use simpler keying (no id) for clarity
+        total_scores = [0.0 for _ in moves]
+        visit_counts = [0 for _ in moves]
+        max_depth = 10
 
-        #runs simulations until the time limit expires
         while time.time() - start_time < time_limit:
-            
-            #random start point
-            move = random.choice(moves)
+            # Randomly pick one candidate move to simulate
+            idx = random.randrange(len(moves))
+            move = moves[idx]
 
-            #Simulate a random playout from this move
+            # Run a random playout (simulation) from that move
             current = move
             depth = 0
-            max_depth = 10  #limit rollout length to avoid infinite loops
-
             while depth < max_depth:
                 next_moves = list(current.moves())
                 if not next_moves:
                     break
 
+                # Prefer moves that don’t increase regions (safe exploration)
                 safe_moves = [m for m in next_moves if m.numRegions() <= s_regions]
-                if not safe_moves:
-                    safe_moves = next_moves  #explore unsafe moves too
-                current = random.choice(safe_moves)
-
-                current = random.choice(safe_moves)
+                current = random.choice(safe_moves if safe_moves else next_moves)
                 depth += 1
 
+            # Evaluate final playout result
             reward = self.evaluate(current, s_regions)
 
-            total_scores[id(move)] += reward
-            visit_counts[id(move)] += 1 #record state and score
+            # Record reward for this move
+            total_scores[idx] += reward
+            visit_counts[idx] += 1
 
-        #choose move with highest average score
+        # Pick move with best average reward
         best_move, best_avg = None, -inf
-        for m in moves:
-            if visit_counts[id(m)] > 0:
-                avg_score = total_scores[id(m)] / visit_counts[id(m)]
+        for i, move in enumerate(moves):
+            if visit_counts[i] > 0:
+                avg_score = total_scores[i] / visit_counts[i]
                 if avg_score > best_avg:
                     best_avg = avg_score
-                    best_move = m
+                    best_move = move
+
+        # Optional debug print (remove in production)
+        # print(f"[DEBUG] Visits: {visit_counts}")
+        # print(f"[DEBUG] Avg scores: {[total_scores[i]/visit_counts[i] if visit_counts[i] else 0 for i in range(len(moves))]}")
 
         return best_move
-                
                 
     def move(self, st: State, mode='alphabeta') -> State: #Alpha-Beta used as primary strategy as it has best performance
         moves = []
@@ -243,6 +241,40 @@ def agent_tester():
 
 if __name__ == "__main__":
     agent_tester()
+
+# --- MCTS Tester ---
+# def test_mcts():
+    # print("\n=== MCTS TEST START ===")
+    
+    # # Create a simple 4x4 state
+    # grid = [[1, 1, 1, 1],
+    #         [1, 1, 1, 1],
+    #         [1, 1, 1, 1],
+    #         [1, 1, 1, 1]]
+    
+    # sa = State(grid)
+    # print("\nInitial State:\n", sa, "\n")
+
+    # # Instantiate agent
+    # agent = Agent("Monte Carlo Bobby", sa.dimensions)
+
+    # # Run MCTS for a short time
+    # print("Running MCTS for 1.5 seconds...")
+    # best_move = agent.mcts(sa, time_limit=1.5)
+
+    # # Print result
+    # if best_move:
+    #     print("\nBest Move Found:\n", best_move)
+    #     print("\nRegions Before:", sa.numRegions())
+    #     print("Regions After:", best_move.numRegions())
+    # else:
+    #     print("No valid move found by MCTS.")
+    
+    # print("\n=== MCTS TEST END ===")
+
+
+#if __name__ == "__main__":
+ #   test_mcts()
     
     
     
