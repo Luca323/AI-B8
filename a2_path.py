@@ -1,6 +1,8 @@
 """
 Hinger Project
-Coursework 001
+Coursework 001: CMP-6058A Artificial Intelligence
+
+Collection and comparison of pathfinding algorithms
 
 @Authors: B8 (100415489, 100426892, 100437079)
 """
@@ -284,14 +286,7 @@ def tester():
     
     
     compare(start, end, path_BFS, path_DFS, path_IDDFS, path_astar, max_depth=20)
-    
-    # Uncomment this if you're NOT running compare
-    #if path is None:
-     #   print("No path found.")
-    #else:
-     #   print(f"Path found with {len(path)} steps:\n")
-      #  for i, step in enumerate(path):
-       #     print(f"Step {i+1}:\n{step}\n")
+
 
 
 if __name__ == "__main__":

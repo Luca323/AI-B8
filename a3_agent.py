@@ -1,6 +1,8 @@
 """
 Hinger Project
-Coursework 001
+Coursework 001: CMP-6058A Artificial Intelligence
+
+Creation of Agent class and decision-making algorithms
 
 @Authors: B8 (100415489, 100426892, 100437079)
 """
@@ -19,7 +21,7 @@ class Agent:
         return f"Agent {self.name}"
     
     def evaluate(self, st: State, parent_reg: int) -> int:
-        #winning move
+        # Reward any move that increases regions (a "winning" hinger move)
         if st.numRegions() != parent_reg:
             return inf
     
@@ -35,9 +37,7 @@ class Agent:
         potential_hingers = st.num_Hingers()
         #fewer active cells = better, more hingers = more opportunities
         return -active_cells + (10 * potential_hingers) 
-   
-    
-    
+
     def is_terminal(self, st: State, parent_reg=None) -> bool:
         if parent_reg is not None:
             return st.numRegions() > parent_reg
@@ -119,59 +119,55 @@ class Agent:
 
         start_time = time.time()
         s_regions = start_state.numRegions()
-        moves = []
-
-        for m in start_state.moves():
-            moves.append(m)
+        moves = list(start_state.moves())
         
         if not moves:
-            return None  
+            return None
 
-        total_scores = {id(m): 0 for m in moves}
-        visit_counts = {id(m): 0 for m in moves}
+        
+        total_scores = [0.0 for _ in moves]
+        visit_counts = [0 for _ in moves]
+        max_depth = 10
 
-        #runs simulations until the time limit expires
         while time.time() - start_time < time_limit:
             
-            #random start point
-            move = random.choice(moves)
+            idx = random.randrange(len(moves))
+            move = moves[idx]
 
-            #Simulate a random playout from this move
+            
             current = move
             depth = 0
-            max_depth = 10  #limit rollout length to avoid infinite loops
-
             while depth < max_depth:
                 next_moves = list(current.moves())
                 if not next_moves:
                     break
 
+                # Prefer moves that don’t increase regions 
                 safe_moves = [m for m in next_moves if m.numRegions() <= s_regions]
-                if not safe_moves:
-                    safe_moves = next_moves  #explore unsafe moves too
-                current = random.choice(safe_moves)
-
-                current = random.choice(safe_moves)
+                current = random.choice(safe_moves if safe_moves else next_moves)
                 depth += 1
 
+           
             reward = self.evaluate(current, s_regions)
 
-            total_scores[id(move)] += reward
-            visit_counts[id(move)] += 1 #record state and score
+            
+            total_scores[idx] += reward
+            visit_counts[idx] += 1
 
-        #choose move with highest average score
+        # Pick move with best average reward
         best_move, best_avg = None, -inf
-        for m in moves:
-            if visit_counts[id(m)] > 0:
-                avg_score = total_scores[id(m)] / visit_counts[id(m)]
+        for i, move in enumerate(moves):
+            if visit_counts[i] > 0:
+                avg_score = total_scores[i] / visit_counts[i]
                 if avg_score > best_avg:
                     best_avg = avg_score
-                    best_move = m
+                    best_move = move
 
         return best_move
                 
-                
-    def move(self, st: State, mode='mcts') -> State: #Alpha-Beta used as primary strategy as it has best performance
+
+    def move(self, st: State, mode='mcts') -> State: #Monte Carlo used as primary strategy as it has best performance
+
         moves = []
         best_move = None
         best_score = -inf
@@ -199,7 +195,7 @@ class Agent:
                         best_move = m
                         
             if mode == 'mcts':
-                return self.mcts(st) #MCTS function works slightly differently
+                return self.mcts(st) 
             
         return best_move
 
@@ -213,22 +209,24 @@ class Agent:
     
 # --- Tester ---
 def agent_tester():
-    grid = [[1, 2, 1, 1],
-            [1, 1, 1, 1],
-            [0, 1, 0, 4],
-            [1, 3, 1, 1]]
+    grid = [[2, 4, 3, 1],
+            [1, 5, 2, 0],
+            [1, 2, 1, 2],
+            [1, 0, 1, 2]]
     sa = State(grid)
     r = sa.numRegions()
 
     print(sa, f"\nNum of Hingers: {sa.num_Hingers()}")
 
-    agent = Agent("Monte Carlo Bobby", sa.dimensions)
-    bm = agent.move(sa, mode='mcts')
+    agent = Agent("Bobby", sa.dimensions)
+
+    # Change the mode to test the different functions
+    bm = agent.move(sa, mode='minimax')
     c = 1
 
     while True:
         if sa and not agent.win(sa, r):
-            bm = agent.move(sa, mode='mcts')
+            bm = agent.move(sa, mode='minimax')
             sa = bm
             c += 1
         elif agent.win(sa, r):
@@ -242,6 +240,48 @@ def agent_tester():
 
 if __name__ == "__main__":
     agent_tester()
+
+# def test_mcts():
+#     print("\n=== MCTS FULL GAME TEST ===")
+
+#     grid = [
+#         [3, 1, 2, 2],
+#         [1, 3, 1, 4],
+#         [2, 1, 2, 1],
+#         [1, 2, 3, 2]
+#     ]
+
+#     sa = State(grid)
+#     agent = Agent("Monte Carlo Bobby", sa.dimensions)
+
+#     print("\nInitial State:\n", sa)
+#     print(f"Regions: {sa.numRegions()} | Hingers: {sa.num_Hingers()}\n")
+
+#     move_counter = 0
+#     max_moves = 50  # safety cutoff
+
+#     while sa.numRegions() < 2 and move_counter < max_moves:
+#         move_counter += 1
+#         print(f"\n--- Move {move_counter} ---")
+
+#         best_move = agent.mcts(sa, time_limit=1.0)
+#         if not best_move:
+#             print("No valid move found.")
+#             break
+
+#         sa = best_move  # apply move
+#         print("After Move", move_counter, ":\n", sa)
+#         print(f"Regions: {sa.numRegions()} | Hingers: {sa.num_Hingers()}")
+
+#     if sa.numRegions() > 1:
+#         print("\n Winning state found")
+#     else:
+#         print("\nNo win found.")
+
+#     print("\n=== MCTS TEST END ===")
+
+# if __name__ == "__main__":
+#    test_mcts()
     
     
     

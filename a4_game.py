@@ -1,6 +1,8 @@
 """
 Hinger Project
-Coursework 001
+Coursework 001: CMP-6058A Artificial Intelligence
+
+Game-playing functionality
 
 @Authors: B8 (100415489, 100426892, 100437079)
 """
