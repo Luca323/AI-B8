@@ -1,6 +1,8 @@
 """
 Hinger Project
-Coursework 001
+Coursework 001: CMP-6058A Artificial Intelligence
+
+Creation of Agent class and decision-making algorithms
 
 @Authors: B8 (100415489, 100426892, 100437079)
 """
