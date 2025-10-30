@@ -112,14 +112,13 @@ def path_astar(start, end):
     
     s_regions = start.numRegions()  #number of regions in the start state
 
-    #Priority queue of tuples: (f, counter, g, state, path)
     prioqueue = []
     counter = itertools.count()  # unique sequence count for tie-breaking
     heapq.heappush(prioqueue, (0, next(counter), 0, start, [start]))
     visited = [start]
 
     #Heuristic: count how many cells differ between two grids
-    def heuristic(a, b): #
+    def heuristic(a, b):
         return sum(
             cell_a != cell_b
             for row_a, row_b in zip(a.grid, b.grid)
@@ -133,24 +132,19 @@ def path_astar(start, end):
             return path
 
         for next_state in current.moves():
-            #skip unsafe states
             if next_state.numRegions() > s_regions:
                 continue
 
-            #Skip closed states
             if any(next_state == v for v in visited):
                 continue
 
-            #Each move costs 1 more step
             new_g = g_score + 1
             h = heuristic(next_state, end)
 
-            #Total estimated cost (f = g + h)
             f = new_g + h
             visited.append(next_state)
             heapq.heappush(prioqueue, (f, next(counter), new_g, next_state, path + [next_state]))
 
-    #if no path found, return None
     return None
 
 def compare(start, end, bfs_fn, dfs_fn, iddfs_fn, astar_fn, max_depth=20):
@@ -181,7 +175,7 @@ def compare(start, end, bfs_fn, dfs_fn, iddfs_fn, astar_fn, max_depth=20):
             "Path Length": path_length
         })
     
-    # Print results in a readable table
+    #print results in a readable table
     print("{:<10} {:<10} {:<12} {:<12}".format("Algorithm", "Correct", "Runtime (s)", "Path Length"))
     print("-" * 46)
     for r in results:
@@ -241,7 +235,6 @@ def min_safe(start, end):
             if not any(next_state == v[0] and new_cost >= v[1] for v in visited):
                 heapq.heappush(prioqueue, (new_cost, next(counter), next_state, path + [next_state]))
 
-    # If no path found, return None
     return None
 
 # --- Tester ---
