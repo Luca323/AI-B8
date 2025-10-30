@@ -31,11 +31,10 @@ class Agent:
                 val = st.grid[i][j]
                 if val > 0:
                     active_cells += 1
-                    if val == 1:  # hinger cell identification
-                        potential_hingers += 1
     
+        potential_hingers = st.num_Hingers()
         #fewer active cells = better, more hingers = more opportunities
-        return -active_cells + (5 * potential_hingers) 
+        return -active_cells + (10 * potential_hingers) 
    
     
     
@@ -116,7 +115,7 @@ class Agent:
     
             return min_eval, best_state
          
-    def mcts(self, start_state: State, time_limit=2.0) -> State:
+    def mcts(self, start_state: State, time_limit=1.5) -> State:
 
         start_time = time.time()
         s_regions = start_state.numRegions()
@@ -172,7 +171,7 @@ class Agent:
         return best_move
                 
                 
-    def move(self, st: State, mode='alphabeta') -> State: #Alpha-Beta used as primary strategy as it has best performance
+    def move(self, st: State, mode='mcts') -> State: #Alpha-Beta used as primary strategy as it has best performance
         moves = []
         best_move = None
         best_score = -inf
@@ -214,10 +213,10 @@ class Agent:
     
 # --- Tester ---
 def agent_tester():
-    grid = [[1, 1, 1, 1],
+    grid = [[1, 2, 1, 1],
             [1, 1, 1, 1],
-            [1, 1, 1, 1],
-            [1, 1, 1, 1]]
+            [0, 1, 0, 4],
+            [1, 3, 1, 1]]
     sa = State(grid)
     r = sa.numRegions()
 

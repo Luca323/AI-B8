@@ -43,14 +43,10 @@ def play(st: State, agentA: Agent, agentB: Agent) -> None:
                 current_agent = player
                 player_move = playermove(st)
                 if player_move == (-2, -2):
-                    print("Out of bounds, illegal move. You lose.")
-                    print(f"{agentA.name} wins the game.")
-                    print(f"Turns taken: {moveNum}")
+                    print(f"Out of bounds, illegal move. You lose.\n{agentA.name} wins the game.\nTurns taken: {moveNum}")
                     return
                 elif player_move == (-1, -1):
-                    print("Illegal move. Cannot remove from a 0. You lose.")
-                    print(f"{agentA.name} wins the game.")
-                    print(f"Turns taken: {moveNum}")
+                    print(f"Illegal move. Cannot remove from a 0. You lose.\n{agentA.name} wins the game.\nTurns taken: {moveNum}")
                     return
                 else:
                     row, column = player_move
@@ -75,7 +71,6 @@ def play(st: State, agentA: Agent, agentB: Agent) -> None:
             
             print(f"Move: {moveNum}")
             print(f"{current_agent.name}'s move:\n" + str(next_state))
-            time.sleep(0.5)
         if current_agent.win(next_state, st.numRegions()):
             print(f"Game Over, {current_agent.name} Wins!")
             print(f"Turns taken: {moveNum}")
@@ -111,7 +106,7 @@ def randomisegrid(height: int, width: int): #Creates random non-binary grid
     for x in range(height):
         gridvals = []
         for x in range(width):
-            gridval = random.randint(1, 3)
+            gridval = random.randint(0, 4)
             gridvals.append(gridval)
         grid.append(gridvals)
     return grid
@@ -119,7 +114,7 @@ def randomisegrid(height: int, width: int): #Creates random non-binary grid
 def playtest():
     grid = randomisegrid(4,4)
     start_state = State(grid=grid)
-    
+    print(f"\nStarting grid: \n\n{start_state}")
     agentA = Agent("Jotaro Kujo", start_state.dimensions)
     agentB = Agent("Dio Brando", start_state.dimensions)
     
