@@ -93,15 +93,15 @@ def playermove(st: State) -> tuple:
     bounds = st.dimensions
     while player_moved == False:
         
-        column = int(input("Enter Row:\n"))
-        row = int(input("Enter Column:\n"))
-        if (row, column) > bounds or (column, row) > bounds: #Checks comments are within the board
+        row = int(input("Enter Row\n"))
+        column = int(input("Enter Column:\n"))
+        if (row, column) > bounds or (column, row) > bounds: #Checks if the player move is in bounds
             return -2, -2
-        elif st.grid[column - 1][row - 1] < 1:
+        elif st.grid[row - 1][column - 1] < 1: #Checks if player move is on a 0
             return -1, -1
-        print(f"Your move is ({column},{row})")
+        print(f"Your move is ({row},{column})")
         player_moved = True
-    return column - 1, row - 1
+    return row - 1, column - 1
 
 def randomisegrid(height: int, width: int): #Creates random non-binary grid
     grid = []
