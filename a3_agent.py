@@ -233,7 +233,7 @@ def agent_tester():
             print(f"Best Move: \n{bm}")
             c+=1
             
-        print(f"Mode: {mode.upper()} Finish in {c} moves")
+        print(f"Mode: {mode.upper()} Finish in {c} moves \n\n")
         
     
 
