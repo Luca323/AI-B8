@@ -18,14 +18,13 @@ def path_DFS(start, end):
 
     def dfs(current, path):
     
-        if current == end: #Base Case
+        if current == end: 
             return path
 
         visited.append(current)
 
-        #Expand open moves
+        
         for next_state in current.moves():
-            #Check if we've already seen this grid
             if next_state.numRegions() > s_regions:
                 continue
             already_visited = any(next_state == v for v in visited)
@@ -52,7 +51,7 @@ def path_BFS(start: State, end: State):
         
         for nxt_st in current.moves():
             if nxt_st.numRegions() > start_regions:
-                continue #Ignores any unsafe moves i.e taking hinger cells
+                continue 
             
             if all(nxt_st != v for v in closed):
                 closed.append(nxt_st)
@@ -64,7 +63,7 @@ def path_BFS(start: State, end: State):
 def path_IDDFS(start, end, max_depth=20):
     s_regions = start.numRegions()
 
-    #Inner recursive DFS with depth limit
+    
     def dfs_limited(current, end, path, depth):
         if current == end:
             return path
@@ -74,16 +73,16 @@ def path_IDDFS(start, end, max_depth=20):
         for next_state in current.moves():
             
             if next_state.numRegions() > s_regions: 
-                continue #Disallows unsafe moves
+                continue 
 
             if not any(next_state == p for p in path):
-                #Safe-state check could go here once numHinges() is ready
+                
                 result = dfs_limited(next_state, end, path + [next_state], depth - 1)
                 if result is not None:
                     return result
         return None
 
-    #Iteratively increase the allowed search depth
+    
     for limit in range(1, max_depth + 1):
         result = dfs_limited(start, end, [start], limit)
         if result is not None:
@@ -108,16 +107,16 @@ This makes the search faster and more efficient without sacrificing efficiency
 
 def path_astar(start, end):
     
-    s_regions = start.numRegions()  #number of regions in the start state
+    s_regions = start.numRegions()  
 
-    #Priority queue of tuples: (f, counter, g, state, path)
+    
     prioqueue = []
-    counter = itertools.count()  # unique sequence count for tie-breaking
+    counter = itertools.count() 
     heapq.heappush(prioqueue, (0, next(counter), 0, start, [start]))
     visited = [start]
 
     #Heuristic: count how many cells differ between two grids
-    def heuristic(a, b): #
+    def heuristic(a, b): 
         return sum(
             cell_a != cell_b
             for row_a, row_b in zip(a.grid, b.grid)
@@ -131,24 +130,24 @@ def path_astar(start, end):
             return path
 
         for next_state in current.moves():
-            #skip unsafe states
+            
             if next_state.numRegions() > s_regions:
                 continue
 
-            #Skip closed states
+            
             if any(next_state == v for v in visited):
                 continue
 
-            #Each move costs 1 more step
+            
             new_g = g_score + 1
             h = heuristic(next_state, end)
 
-            #Total estimated cost (f = g + h)
+            
             f = new_g + h
             visited.append(next_state)
             heapq.heappush(prioqueue, (f, next(counter), new_g, next_state, path + [next_state]))
 
-    #if no path found, return None
+    
     return None
 
 def compare(start, end, bfs_fn, dfs_fn, iddfs_fn, astar_fn, max_depth=20):
@@ -208,7 +207,7 @@ It expands paths in order of their total cost, guaranteeing the minimal- cost sa
 def min_safe(start, end):
     s_regions = start.numRegions()
     
-    #Priority queue stores (total_cost, counter, state, path)
+    
     prioqueue = []
     counter = itertools.count()
     heapq.heappush(prioqueue, (0, next(counter), start, [start]))
@@ -222,24 +221,24 @@ def min_safe(start, end):
             return path
 
         if any(current == v[0] and total_cost >= v[1] for v in visited):
-            continue #Ignore if the state has already been visited with lower cost
+            continue 
             
         visited.append((current, total_cost))
 
         for next_state in current.moves():
             
-            #skip unsafe moves (those that increase the number of regions)
+            
             if next_state.numRegions() > s_regions:
                 continue
 
-            move_cost = 1  #each move costs 1 step
+            move_cost = 1  
             new_cost = total_cost + move_cost
 
-            #push if we haven’t found a cheaper way to reach this state
+            
             if not any(next_state == v[0] and new_cost >= v[1] for v in visited):
                 heapq.heappush(prioqueue, (new_cost, next(counter), next_state, path + [next_state]))
 
-    # If no path found, return None
+    
     return None
 
 # --- Tester ---
@@ -285,7 +284,7 @@ def tester():
     
     compare(start, end, path_BFS, path_DFS, path_IDDFS, path_astar, max_depth=20)
     
-    # Uncomment this if you're NOT running compare
+    # Uncomment this if NOT running compare
     #if path is None:
      #   print("No path found.")
     #else:
