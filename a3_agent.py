@@ -117,7 +117,7 @@ class Agent:
             return min_eval, best_state
          
     def mcts(self, start_state: State, time_limit=2.0) -> State:
-        """Improved Monte Carlo Tree Search rollout version."""
+        
         start_time = time.time()
         s_regions = start_state.numRegions()
         moves = list(start_state.moves())
@@ -125,17 +125,17 @@ class Agent:
         if not moves:
             return None
 
-        # Use simpler keying (no id) for clarity
+        
         total_scores = [0.0 for _ in moves]
         visit_counts = [0 for _ in moves]
         max_depth = 10
 
         while time.time() - start_time < time_limit:
-            # Randomly pick one candidate move to simulate
+            
             idx = random.randrange(len(moves))
             move = moves[idx]
 
-            # Run a random playout (simulation) from that move
+            
             current = move
             depth = 0
             while depth < max_depth:
@@ -143,15 +143,15 @@ class Agent:
                 if not next_moves:
                     break
 
-                # Prefer moves that don’t increase regions (safe exploration)
+                # Prefer moves that don’t increase regions 
                 safe_moves = [m for m in next_moves if m.numRegions() <= s_regions]
                 current = random.choice(safe_moves if safe_moves else next_moves)
                 depth += 1
 
-            # Evaluate final playout result
+           
             reward = self.evaluate(current, s_regions)
 
-            # Record reward for this move
+            
             total_scores[idx] += reward
             visit_counts[idx] += 1
 
@@ -163,10 +163,6 @@ class Agent:
                 if avg_score > best_avg:
                     best_avg = avg_score
                     best_move = move
-
-        # Optional debug print (remove in production)
-        # print(f"[DEBUG] Visits: {visit_counts}")
-        # print(f"[DEBUG] Avg scores: {[total_scores[i]/visit_counts[i] if visit_counts[i] else 0 for i in range(len(moves))]}")
 
         return best_move
                 
@@ -198,7 +194,7 @@ class Agent:
                         best_move = m
                         
             if mode == 'mcts':
-                return self.mcts(st) #MCTS function works slightly differently
+                return self.mcts(st) 
             
         return best_move
 
@@ -212,22 +208,24 @@ class Agent:
     
 # --- Tester ---
 def agent_tester():
-    grid = [[1, 1, 1, 1],
-            [1, 1, 1, 1],
-            [1, 1, 1, 1],
-            [1, 1, 1, 1]]
+    grid = [[2, 4, 3, 1],
+            [1, 5, 2, 0],
+            [1, 2, 1, 2],
+            [1, 0, 1, 2]]
     sa = State(grid)
     r = sa.numRegions()
 
     print(sa, f"\nNum of Hingers: {sa.num_Hingers()}")
 
-    agent = Agent("Monte Carlo Bobby", sa.dimensions)
-    bm = agent.move(sa, mode='mcts')
+    agent = Agent("Bobby", sa.dimensions)
+
+    # Change the mode to test the different functions
+    bm = agent.move(sa, mode='minimax')
     c = 1
 
     while True:
         if sa and not agent.win(sa, r):
-            bm = agent.move(sa, mode='mcts')
+            bm = agent.move(sa, mode='minimax')
             sa = bm
             c += 1
         elif agent.win(sa, r):
@@ -242,39 +240,47 @@ def agent_tester():
 if __name__ == "__main__":
     agent_tester()
 
-# --- MCTS Tester ---
 # def test_mcts():
-    # print("\n=== MCTS TEST START ===")
-    
-    # # Create a simple 4x4 state
-    # grid = [[1, 1, 1, 1],
-    #         [1, 1, 1, 1],
-    #         [1, 1, 1, 1],
-    #         [1, 1, 1, 1]]
-    
-    # sa = State(grid)
-    # print("\nInitial State:\n", sa, "\n")
+#     print("\n=== MCTS FULL GAME TEST ===")
 
-    # # Instantiate agent
-    # agent = Agent("Monte Carlo Bobby", sa.dimensions)
+#     grid = [
+#         [3, 1, 2, 2],
+#         [1, 3, 1, 4],
+#         [2, 1, 2, 1],
+#         [1, 2, 3, 2]
+#     ]
 
-    # # Run MCTS for a short time
-    # print("Running MCTS for 1.5 seconds...")
-    # best_move = agent.mcts(sa, time_limit=1.5)
+#     sa = State(grid)
+#     agent = Agent("Monte Carlo Bobby", sa.dimensions)
 
-    # # Print result
-    # if best_move:
-    #     print("\nBest Move Found:\n", best_move)
-    #     print("\nRegions Before:", sa.numRegions())
-    #     print("Regions After:", best_move.numRegions())
-    # else:
-    #     print("No valid move found by MCTS.")
-    
-    # print("\n=== MCTS TEST END ===")
+#     print("\nInitial State:\n", sa)
+#     print(f"Regions: {sa.numRegions()} | Hingers: {sa.num_Hingers()}\n")
 
+#     move_counter = 0
+#     max_moves = 50  # safety cutoff
 
-#if __name__ == "__main__":
- #   test_mcts()
+#     while sa.numRegions() < 2 and move_counter < max_moves:
+#         move_counter += 1
+#         print(f"\n--- Move {move_counter} ---")
+
+#         best_move = agent.mcts(sa, time_limit=1.0)
+#         if not best_move:
+#             print("No valid move found.")
+#             break
+
+#         sa = best_move  # apply move
+#         print("After Move", move_counter, ":\n", sa)
+#         print(f"Regions: {sa.numRegions()} | Hingers: {sa.num_Hingers()}")
+
+#     if sa.numRegions() > 1:
+#         print("\n Winning state found")
+#     else:
+#         print("\nNo win found.")
+
+#     print("\n=== MCTS TEST END ===")
+
+# if __name__ == "__main__":
+#    test_mcts()
     
     
     
