@@ -15,7 +15,7 @@ class Agent:
     def __init__(self, name: str,  size: tuple):
         self.name = name
         self.size = size
-        self.modes = ['alphabeta', 'minimax']
+        self.modes = ['alphabeta', 'minimax','mcts']
         
     def __str__(self):
         return f"Agent {self.name}"
@@ -209,79 +209,40 @@ class Agent:
     
 # --- Tester ---
 def agent_tester():
-    grid = [[2, 4, 3, 1],
-            [1, 5, 2, 0],
-            [1, 2, 1, 2],
-            [1, 0, 1, 2]]
+    grid = [[1, 0, 0, 1],
+            [1, 1, 0, 0],
+            [1, 1, 1, 0],
+            [1, 0, 1, 0]]
     sa = State(grid)
     r = sa.numRegions()
+    agent = Agent("Bobby Jean", sa.dimensions)
+    
+    for mode in agent.modes:
+        print(sa, f"\nNum of Regions: {sa.numRegions()}")
+        print( f"Num of Hingers: {sa.num_Hingers()}")
+    
+        c = 1
+        
+        bm = agent.move(sa, mode=mode)
+        print(f"Best Move: \n{bm}")
+        
+        while bm and not agent.win(bm, r):#
+            r = bm.numRegions()
+            temp = bm
+            bm = agent.move(temp, mode=mode)
+            print(f"Best Move: \n{bm}")
+            c+=1
+            
+        print(f"Mode: {mode.upper()} Finish in {c} moves")
+        
+    
 
-    print(sa, f"\nNum of Hingers: {sa.num_Hingers()}")
-
-    agent = Agent("Bobby", sa.dimensions)
-
-    # Change the mode to test the different functions
-    bm = agent.move(sa, mode='minimax')
-    c = 1
-
-    while True:
-        if sa and not agent.win(sa, r):
-            bm = agent.move(sa, mode='minimax')
-            sa = bm
-            c += 1
-        elif agent.win(sa, r):
-            print("Winning State", f"in {c} moves")
-            break
-        else:
-            print(f"Finish in {c} moves")
-
-        print(f"\nBest Move ({c}):\n", bm)
+    
 
 
 if __name__ == "__main__":
     agent_tester()
 
-# def test_mcts():
-#     print("\n=== MCTS FULL GAME TEST ===")
-
-#     grid = [
-#         [3, 1, 2, 2],
-#         [1, 3, 1, 4],
-#         [2, 1, 2, 1],
-#         [1, 2, 3, 2]
-#     ]
-
-#     sa = State(grid)
-#     agent = Agent("Monte Carlo Bobby", sa.dimensions)
-
-#     print("\nInitial State:\n", sa)
-#     print(f"Regions: {sa.numRegions()} | Hingers: {sa.num_Hingers()}\n")
-
-#     move_counter = 0
-#     max_moves = 50  # safety cutoff
-
-#     while sa.numRegions() < 2 and move_counter < max_moves:
-#         move_counter += 1
-#         print(f"\n--- Move {move_counter} ---")
-
-#         best_move = agent.mcts(sa, time_limit=1.0)
-#         if not best_move:
-#             print("No valid move found.")
-#             break
-
-#         sa = best_move  # apply move
-#         print("After Move", move_counter, ":\n", sa)
-#         print(f"Regions: {sa.numRegions()} | Hingers: {sa.num_Hingers()}")
-
-#     if sa.numRegions() > 1:
-#         print("\n Winning state found")
-#     else:
-#         print("\nNo win found.")
-
-#     print("\n=== MCTS TEST END ===")
-
-# if __name__ == "__main__":
-#    test_mcts()
     
     
     
